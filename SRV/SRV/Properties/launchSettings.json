@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "SRV (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "SRV (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

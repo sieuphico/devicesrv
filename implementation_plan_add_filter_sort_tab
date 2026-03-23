@@ -1,0 +1,37 @@
+# Kế hoạch Triển khai Tính năng Nâng cao
+
+Mục tiêu: Đưa ứng dụng WinUI thành một hệ thống quản lý kho thiết bị Real-time hoàn chỉnh với các tab riêng biệt, chức năng mượn trả, bộ lọc/sort dạng cột và đồng bộ multi-instance.
+
+## Proposed Changes
+
+### 1. Database & Tối ưu hóa (Data Layer)
+*   **[MODIFY] [Device.cs](file:///d:/dev/devicesrv/SRV/SRV/Data/Device.cs)**: Thêm field `public bool IsBorrowed { get; set; } = false;` để theo dõi trạng thái thiết bị đã mượn. (Lưu ý: sẽ dùng `ExecuteSqlRaw` để ALTER TABLE thêm cột này tự động nếu DB đã có sẵn).
+*   **[MODIFY] Cập nhật logic `Available`**: `Available` trong bảng [Model](file:///d:/dev/devicesrv/SRV/SRV/Data/Model.cs#5-16) sẽ liên tục được cập nhật khi một máy được mượn (giảm đi N). 
+*   **Tích hợp `LISTEN / NOTIFY` của PostgreSQL**: Đây là trái tim của tính năng đồng bộ Multi-instance. Khi một Instance nhấn "Borrow" và cập nhật xong CSDL, nó sẽ gọi lệnh `NOTIFY db_change`. Tất cả các Instance khác đang mở sẽ có một Background Task chạy `NpgsqlConnection.WaitAsync()` để lắng nghe lệnh `LISTEN db_change`, ngay lập tức Auto-Refresh lại màn hình của chúng.
+
+### 2. Services Layer
+*   **[MODIFY] [IDeviceService](file:///d:/dev/devicesrv/SRV/SRV/Services/IDeviceService.cs#7-11) & [DeviceService](file:///d:/dev/devicesrv/SRV/SRV/Services/DeviceService.cs#9-43)**:
+    *   Chia làm 2 hàm chính: `GetWarehouseModelsAsync(...)` và `GetBorrowedDevicesAsync(...)`.
+    *   Hỗ trợ `SortColumn`, `SortDirection`, và danh sách `ColumnFilters` (Ví dụ dictionary chứa key="Name", value="iPhone" để lọc theo nhiều cột cùng lúc).
+    *   Hàm `BorrowDevicesAsync(int modelId, int quantity)`: Tìm kiếm `quantity` thiết bị chưa mượn của model ID đó, set `IsBorrowed = true`, giảm `Available` của Model, lưu cập nhật (Transaction) và gọi `NOTIFY db_change`.
+
+### 3. ViewModels
+*   Cấu trúc lại [MainViewModel](file:///d:/dev/devicesrv/SRV/SRV/ViewModels/MainViewModel.cs#56-64) (hoặc tạo thêm `WarehouseViewModel` và `BorrowedViewModel` để dễ quản lý):
+    *   Chứa trạng thái của 2 Tab (Models và Borrowed Devices).
+    *   State cho các TextBox trên DataGrid Header (NameFilter, CategoryFilter...) và trạng thái Sort (Asc/Desc) hiện tại của cột nào được bấm.
+    *   Lệnh `BorrowCommand`: Nhận tham số là Model hiện tại và số lượng (được gõ ở UI).
+    *   Background Task lắng nghe Postgres Notify.
+
+### 4. Giao diện (WinUI - MainWindow.xaml)
+*   **[MODIFY] [MainWindow.xaml](file:///d:/dev/devicesrv/SRV/SRV/MainWindow.xaml)**: Xóa Grid Filter tìm kiếm cũ ở đầu.
+*   Bọc ứng dụng bằng `TabView` / `Pivot` gồm 2 Tab:
+    *   **Tab 1 (Kho Model)**: `ListView` với DataTemplate tuỳ biến cho Header. Trong Header của mỗi cột (Name, Category, Manufacturer) sẽ có một TextBlock (Bấm vào để Sort) và TextBox nằm dưới (Dùng để gõ Filter, bind vào thuộc tính ViewModel, auto trigger search sau 500ms hoặc khi Enter). Cột cuối "Chức năng" có một TextBox/NumberBox (nhập số lượng) và Nút "Borrow".
+    *   **Tab 2 (Thiết bị đã mượn)**: Hiển thị danh sách thiết bị có `IsBorrowed == true`. Header cũng có text filter và sort.
+
+## Verification Plan
+*   **Manual**: 
+    1. Build App và mở 2 cửa sổ ứng dụng riêng biệt (Instance A, Instance B).
+    2. Ở Tab "Kho Model", gõ tìm kiếm ở cột Name kiểm tra lọc và nhấn Header để kiểm tra Sort.
+    3. Ở Instance A, nhập số lượng 5 và nhấn Borrow tại môt Model.
+    4. Xác minh Instance B tự động cập nhật số lượng `Available` của Model đó giảm đi 5 (không cần nhấn F5).
+    5. Chuyển sang Tab "Đã mượn" kiểm tra sẽ thấy 5 thiết bị mới hiện lên.
