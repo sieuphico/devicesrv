@@ -106,7 +106,29 @@
                                 </controls:DataGridTemplateColumn.CellTemplate>
                             </controls:DataGridTemplateColumn>
 
-                            <controls:DataGridTextColumn Header="Category" Binding="{Binding Category}" Width="*" Tag="Category"/>
+                            <controls:DataGridTemplateColumn Width="*" Tag="Category" Header="Category">
+                                <controls:DataGridTemplateColumn.HeaderStyle>
+                                    <Style TargetType="primitives:DataGridColumnHeader">
+                                        <Setter Property="ContentTemplate">
+                                            <Setter.Value>
+                                                <DataTemplate>
+                                                    <StackPanel Spacing="2">
+                                                        <TextBlock Text="{Binding}" FontWeight="Bold"/>
+                                                        <ComboBox ItemsSource="{Binding Source={StaticResource Proxy}, Path=Data.ModelCategories}"
+                                                                  SelectedItem="{Binding Source={StaticResource Proxy}, Path=Data.ModelCategoryFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                  Height="32" Padding="4,0" HorizontalAlignment="Stretch"/>
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </controls:DataGridTemplateColumn.HeaderStyle>
+                                <controls:DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="models:Model">
+                                        <TextBlock Text="{Binding Category}" VerticalAlignment="Center" Margin="10,0"/>
+                                    </DataTemplate>
+                                </controls:DataGridTemplateColumn.CellTemplate>
+                            </controls:DataGridTemplateColumn>
                             <controls:DataGridTextColumn Header="Available" Binding="{Binding Available}" Width="*" Tag="Available"/>
                             
                             <controls:DataGridTemplateColumn Header="Function" Width="100">
