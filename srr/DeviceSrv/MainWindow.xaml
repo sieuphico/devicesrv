@@ -68,7 +68,7 @@
                                         <Setter Property="ContentTemplate">
                                             <Setter.Value>
                                                 <DataTemplate>
-                                                    <Grid Loaded="FilterGrid_Loaded">
+                                                    <Grid Loaded="FilterGrid_Loaded" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
                                                         <Grid.RowDefinitions>
                                                             <RowDefinition Height="Auto"/>
                                                             <RowDefinition Height="Auto"/>
@@ -99,7 +99,7 @@
                                         <Setter Property="ContentTemplate">
                                             <Setter.Value>
                                                 <DataTemplate>
-                                                    <Grid Loaded="FilterGrid_Loaded">
+                                                    <Grid Loaded="FilterGrid_Loaded" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
                                                         <Grid.RowDefinitions>
                                                             <RowDefinition Height="Auto"/>
                                                             <RowDefinition Height="Auto"/>
@@ -130,7 +130,7 @@
                                         <Setter Property="ContentTemplate">
                                             <Setter.Value>
                                                 <DataTemplate>
-                                                    <Grid Loaded="FilterGrid_Loaded">
+                                                    <Grid Loaded="FilterGrid_Loaded" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
                                                         <Grid.RowDefinitions>
                                                             <RowDefinition Height="Auto"/>
                                                             <RowDefinition Height="Auto"/>
@@ -198,7 +198,7 @@
                                         <Setter Property="ContentTemplate">
                                             <Setter.Value>
                                                 <DataTemplate>
-                                                    <Grid Loaded="FilterGrid_Loaded">
+                                                    <Grid Loaded="FilterGrid_Loaded" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
                                                         <Grid.RowDefinitions>
                                                             <RowDefinition Height="Auto"/>
                                                             <RowDefinition Height="Auto"/>
@@ -229,7 +229,7 @@
                                         <Setter Property="ContentTemplate">
                                             <Setter.Value>
                                                 <DataTemplate>
-                                                    <Grid Loaded="FilterGrid_Loaded">
+                                                    <Grid Loaded="FilterGrid_Loaded" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
                                                         <Grid.RowDefinitions>
                                                             <RowDefinition Height="Auto"/>
                                                             <RowDefinition Height="Auto"/>
@@ -260,7 +260,7 @@
                                         <Setter Property="ContentTemplate">
                                             <Setter.Value>
                                                 <DataTemplate>
-                                                    <Grid Loaded="FilterGrid_Loaded">
+                                                    <Grid Loaded="FilterGrid_Loaded" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
                                                         <Grid.RowDefinitions>
                                                             <RowDefinition Height="Auto"/>
                                                             <RowDefinition Height="Auto"/>

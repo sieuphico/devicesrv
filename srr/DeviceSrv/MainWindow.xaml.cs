@@ -27,8 +27,8 @@ namespace DeviceSrv
         {
             if (sender is DataGrid grid)
             {
-                // Toggle sort direction
-                var isDescending = e.Column.SortDirection == null || e.Column.SortDirection == DataGridSortDirection.Ascending;
+                // Toggle sort direction: Usually null initially, so we default to Ascending first click.
+                var isDescending = e.Column.SortDirection == DataGridSortDirection.Ascending;
                 
                 // Clear other columns' sort indicators
                 foreach (var column in grid.Columns)
@@ -38,18 +38,16 @@ namespace DeviceSrv
 
                 e.Column.SortDirection = isDescending ? DataGridSortDirection.Descending : DataGridSortDirection.Ascending;
 
-                // Update ViewModel and trigger server-side reload
                 var columnName = e.Column.Tag?.ToString() ?? "Id";
+                System.Diagnostics.Debug.WriteLine($"[SORT LOG] UI Grid Clicked: Header={e.Column.Header}, ColumnTag={columnName}, Descending={isDescending}");
                 
                 if (grid == ModelGrid)
                 {
-                    ViewModel.ModelOrderBy = columnName;
-                    ViewModel.ModelIsDescending = isDescending;
+                    ViewModel.UpdateModelSort(columnName, isDescending);
                 }
                 else if (grid == DeviceGrid)
                 {
-                    ViewModel.DeviceOrderBy = columnName;
-                    ViewModel.DeviceIsDescending = isDescending;
+                    ViewModel.UpdateDeviceSort(columnName, isDescending);
                 }
             }
         }

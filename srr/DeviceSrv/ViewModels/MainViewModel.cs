@@ -26,16 +26,36 @@ namespace DeviceSrv.ViewModels
         public string ErrorMessage { get => _errorMessage; set { _errorMessage = value; OnPropertyChanged(); OnPropertyChanged(nameof(HasError)); } }
         public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
 
-        // Sorting (Shared for simplicity, or can be separated)
+        // Sorting
         private string _modelOrderBy = "Name";
-        public string ModelOrderBy { get => _modelOrderBy; set { _modelOrderBy = value; OnPropertyChanged(); LoadModelsAsync(); } }
+        public string ModelOrderBy { get => _modelOrderBy; set { _modelOrderBy = value; OnPropertyChanged(); } }
         private bool _modelIsDescending = false;
-        public bool ModelIsDescending { get => _modelIsDescending; set { _modelIsDescending = value; OnPropertyChanged(); LoadModelsAsync(); } }
+        public bool ModelIsDescending { get => _modelIsDescending; set { _modelIsDescending = value; OnPropertyChanged(); } }
 
         private string _deviceOrderBy = "Id";
-        public string DeviceOrderBy { get => _deviceOrderBy; set { _deviceOrderBy = value; OnPropertyChanged(); LoadDevicesAsync(); } }
+        public string DeviceOrderBy { get => _deviceOrderBy; set { _deviceOrderBy = value; OnPropertyChanged(); } }
         private bool _deviceIsDescending = false;
-        public bool DeviceIsDescending { get => _deviceIsDescending; set { _deviceIsDescending = value; OnPropertyChanged(); LoadDevicesAsync(); } }
+        public bool DeviceIsDescending { get => _deviceIsDescending; set { _deviceIsDescending = value; OnPropertyChanged(); } }
+
+        public void UpdateModelSort(string orderBy, bool isDescending)
+        {
+            System.Diagnostics.Debug.WriteLine($"[SORT LOG] Requesting Model Sort: Column={orderBy}, Descending={isDescending}");
+            _modelOrderBy = orderBy;
+            _modelIsDescending = isDescending;
+            OnPropertyChanged(nameof(ModelOrderBy));
+            OnPropertyChanged(nameof(ModelIsDescending));
+            _ = LoadModelsAsync();
+        }
+
+        public void UpdateDeviceSort(string orderBy, bool isDescending)
+        {
+            System.Diagnostics.Debug.WriteLine($"[SORT LOG] Requesting Device Sort: Column={orderBy}, Descending={isDescending}");
+            _deviceOrderBy = orderBy;
+            _deviceIsDescending = isDescending;
+            OnPropertyChanged(nameof(DeviceOrderBy));
+            OnPropertyChanged(nameof(DeviceIsDescending));
+            _ = LoadDevicesAsync();
+        }
 
         // Model Filters
         private string _modelNameFilter = "";
@@ -107,7 +127,9 @@ namespace DeviceSrv.ViewModels
         {
             try
             {
+                System.Diagnostics.Debug.WriteLine($"[SORT LOG] Executing Model DB Query: ORDER BY {ModelOrderBy} {(ModelIsDescending ? "DESC" : "ASC")}");
                 var models = await _deviceService.GetModelsAsync(ModelOrderBy, ModelIsDescending);
+                System.Diagnostics.Debug.WriteLine($"[SORT LOG] Loaded {models.Count()} Models from DB.");
                 
                 // Extract unique categories (once or merge carefully to avoid resetting selection loop)
                 var uniqueCategories = models.Select(m => m.Category).Where(c => !string.IsNullOrEmpty(c)).Distinct().OrderBy(c => c).ToList();
