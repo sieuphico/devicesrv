@@ -99,6 +99,9 @@ namespace DeviceSrv
         {
             if (sender is Grid grid)
             {
+                // Clear any manual widths if set previously
+                grid.Width = double.NaN; 
+            
                 Microsoft.UI.Xaml.DependencyObject parent = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetParent(grid);
                 while (parent != null && !(parent is CommunityToolkit.WinUI.UI.Controls.Primitives.DataGridColumnHeader))
                 {
@@ -107,26 +110,55 @@ namespace DeviceSrv
                 
                 if (parent is CommunityToolkit.WinUI.UI.Controls.Primitives.DataGridColumnHeader header)
                 {
-                    // Update width based on header initially
-                    UpdateGridWidth(grid, header);
-
-                    // Update width dynamically when header resizes
-                    header.SizeChanged += (s, args) => 
+                    // Unbind ContentPresenter from Auto Column constraints and force Stretch
+                    var presenter = FindVisualChildByType<Microsoft.UI.Xaml.Controls.ContentPresenter>(header);
+                    if (presenter != null)
                     {
-                        UpdateGridWidth(grid, header);
-                    };
+                        Microsoft.UI.Xaml.Controls.Grid.SetColumnSpan(presenter, 2);
+                        presenter.HorizontalAlignment = Microsoft.UI.Xaml.HorizontalAlignment.Stretch;
+                        presenter.HorizontalContentAlignment = Microsoft.UI.Xaml.HorizontalAlignment.Stretch;
+                    }
+
+                    // Reposition SortIcon perfectly inside Row 0
+                    var sortIcon = FindVisualChildByName<Microsoft.UI.Xaml.Controls.FontIcon>(header, "SortIcon");
+                    if (sortIcon != null)
+                    {
+                        sortIcon.VerticalAlignment = Microsoft.UI.Xaml.VerticalAlignment.Top;
+                        sortIcon.HorizontalAlignment = Microsoft.UI.Xaml.HorizontalAlignment.Right;
+                        sortIcon.Margin = new Microsoft.UI.Xaml.Thickness(0, 12, 12, 0); 
+                    }
                 }
             }
         }
 
-        private void UpdateGridWidth(Grid innerGrid, FrameworkElement header)
+        private T? FindVisualChildByName<T>(Microsoft.UI.Xaml.DependencyObject parent, string name) where T : Microsoft.UI.Xaml.DependencyObject
         {
-            // Reserve ~32px for the built-in sort arrow and default margins to ensure layout fits perfectly
-            var targetWidth = header.ActualWidth - 32;
-            if (targetWidth > 0)
+            for (int i = 0; i < Microsoft.UI.Xaml.Media.VisualTreeHelper.GetChildrenCount(parent); i++)
             {
-                innerGrid.Width = targetWidth;
+                var child = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetChild(parent, i);
+                if (child is T typedChild && (child as Microsoft.UI.Xaml.FrameworkElement)?.Name == name)
+                {
+                    return typedChild;
+                }
+                var result = FindVisualChildByName<T>(child, name);
+                if (result != null) return result;
             }
+            return null;
+        }
+
+        private T? FindVisualChildByType<T>(Microsoft.UI.Xaml.DependencyObject parent) where T : Microsoft.UI.Xaml.DependencyObject
+        {
+            for (int i = 0; i < Microsoft.UI.Xaml.Media.VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetChild(parent, i);
+                if (child is T typedChild)
+                {
+                    return typedChild;
+                }
+                var result = FindVisualChildByType<T>(child);
+                if (result != null) return result;
+            }
+            return null;
         }
     }
 }
