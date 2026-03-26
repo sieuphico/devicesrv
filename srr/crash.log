@@ -1,0 +1,18 @@
+[3/26/2026 11:10:48 PM] CRASH: Content does not support UIElement; use ContentTemplate instead.
+StackTrace:
+   at CommunityToolkit.WinUI.UI.Controls.Primitives.DataGridColumnHeader.OnContentChanged(Object oldContent, Object newContent)
+   at Microsoft.UI.Xaml.Controls.ContentControl.Microsoft.UI.Xaml.Controls.IContentControlOverrides.OnContentChanged(Object oldContent, Object newContent)
+   at ABI.Microsoft.UI.Xaml.Controls.IContentControlOverrides.Do_Abi_OnContentChanged_0(IntPtr thisPtr, IntPtr oldContent, IntPtr newContent)
+--- End of stack trace from previous location ---
+   at WinRT.ExceptionHelpers.<ThrowExceptionForHR>g__Throw|38_0(Int32 hr)
+   at WinRT.ExceptionHelpers.ThrowExceptionForHR(Int32 hr)
+   at ABI.Microsoft.UI.Xaml.Controls.IContentControlMethods.set_Content(IObjectReference _obj, Object value)
+   at Microsoft.UI.Xaml.Controls.ContentControl.set_Content(Object value)
+   at CommunityToolkit.WinUI.UI.Controls.DataGridColumn.CreateHeader()
+   at CommunityToolkit.WinUI.UI.Controls.DataGridColumn.get_HeaderCell()
+   at CommunityToolkit.WinUI.UI.Controls.DataGrid.InsertDisplayedColumnHeader(DataGridColumn dataGridColumn)
+   at CommunityToolkit.WinUI.UI.Controls.DataGrid.OnApplyTemplate()
+   at Microsoft.UI.Xaml.FrameworkElement.Microsoft.UI.Xaml.IFrameworkElementOverrides.OnApplyTemplate()
+   at ABI.Microsoft.UI.Xaml.IFrameworkElementOverrides.Do_Abi_OnApplyTemplate_2(IntPtr thisPtr)
+InnerException: 
+InnerStackTrace:

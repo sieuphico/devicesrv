@@ -14,6 +14,13 @@ namespace DeviceSrv
         {
             this.InitializeComponent();
             ViewModel = new MainViewModel();
+            RootGrid.DataContext = ViewModel;
+
+            // Bridge the ViewModel to the stable BindingProxy
+            if (RootGrid.Resources["Proxy"] is BindingProxy proxy)
+            {
+                proxy.Data = ViewModel;
+            }
         }
 
         private void DataGrid_Sorting(object? sender, DataGridColumnEventArgs e)
