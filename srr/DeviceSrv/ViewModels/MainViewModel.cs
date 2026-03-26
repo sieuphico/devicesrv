@@ -19,6 +19,8 @@ namespace DeviceSrv.ViewModels
         public ObservableCollection<Model> Models { get; } = new();
         public ObservableCollection<Device> Devices { get; } = new();
 
+        public ObservableCollection<string> ModelCategories { get; } = new();
+
         // Error Handling
         private string _errorMessage = "";
         public string ErrorMessage { get => _errorMessage; set { _errorMessage = value; OnPropertyChanged(); OnPropertyChanged(nameof(HasError)); } }
@@ -40,6 +42,25 @@ namespace DeviceSrv.ViewModels
         public string ModelNameFilter { get => _modelNameFilter; set { _modelNameFilter = value; OnPropertyChanged(); LoadModelsAsync(); } }
         private string _modelManufacturerFilter = "";
         public string ModelManufacturerFilter { get => _modelManufacturerFilter; set { _modelManufacturerFilter = value; OnPropertyChanged(); LoadModelsAsync(); } }
+        
+        private bool _isUpdatingCategories = false;
+        private string _modelCategoryFilter = "All";
+        public string ModelCategoryFilter 
+        { 
+            get => _modelCategoryFilter; 
+            set 
+            { 
+                if (_modelCategoryFilter != value)
+                {
+                    _modelCategoryFilter = value ?? "All"; 
+                    OnPropertyChanged(); 
+                    if (!_isUpdatingCategories) 
+                    {
+                        LoadModelsAsync(); 
+                    }
+                }
+            } 
+        }
 
         // Device Filters
         private string _deviceNameFilter = "";
@@ -87,9 +108,37 @@ namespace DeviceSrv.ViewModels
             try
             {
                 var models = await _deviceService.GetModelsAsync(ModelOrderBy, ModelIsDescending);
+                
+                // Extract unique categories (once or merge carefully to avoid resetting selection loop)
+                var uniqueCategories = models.Select(m => m.Category).Where(c => !string.IsNullOrEmpty(c)).Distinct().OrderBy(c => c).ToList();
+                uniqueCategories.Insert(0, "All");
+                
+                if (!ModelCategories.SequenceEqual(uniqueCategories))
+                {
+                    _isUpdatingCategories = true;
+                    var oldFilter = ModelCategoryFilter;
+                    
+                    ModelCategories.Clear();
+                    foreach (var cat in uniqueCategories)
+                    {
+                        ModelCategories.Add(cat);
+                    }
+                    
+                    if (oldFilter != null && ModelCategories.Contains(oldFilter))
+                    {
+                        ModelCategoryFilter = oldFilter;
+                    }
+                    else
+                    {
+                        ModelCategoryFilter = "All";
+                    }
+                    _isUpdatingCategories = false;
+                }
+
                 var filtered = models.Where(m => 
                     (string.IsNullOrEmpty(ModelNameFilter) || m.Name.Contains(ModelNameFilter, StringComparison.OrdinalIgnoreCase)) &&
-                    (string.IsNullOrEmpty(ModelManufacturerFilter) || m.Manufacturer.Contains(ModelManufacturerFilter, StringComparison.OrdinalIgnoreCase))
+                    (string.IsNullOrEmpty(ModelManufacturerFilter) || m.Manufacturer.Contains(ModelManufacturerFilter, StringComparison.OrdinalIgnoreCase)) &&
+                    (ModelCategoryFilter == "All" || m.Category == ModelCategoryFilter)
                 );
 
                 Models.Clear();

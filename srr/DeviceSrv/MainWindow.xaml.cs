@@ -94,5 +94,39 @@ namespace DeviceSrv
                 ViewModel.CurrentPage++;
             }
         }
+
+        private void FilterGrid_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (sender is Grid grid)
+            {
+                Microsoft.UI.Xaml.DependencyObject parent = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetParent(grid);
+                while (parent != null && !(parent is CommunityToolkit.WinUI.UI.Controls.Primitives.DataGridColumnHeader))
+                {
+                    parent = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetParent(parent);
+                }
+                
+                if (parent is CommunityToolkit.WinUI.UI.Controls.Primitives.DataGridColumnHeader header)
+                {
+                    // Update width based on header initially
+                    UpdateGridWidth(grid, header);
+
+                    // Update width dynamically when header resizes
+                    header.SizeChanged += (s, args) => 
+                    {
+                        UpdateGridWidth(grid, header);
+                    };
+                }
+            }
+        }
+
+        private void UpdateGridWidth(Grid innerGrid, FrameworkElement header)
+        {
+            // Reserve ~32px for the built-in sort arrow and default margins to ensure layout fits perfectly
+            var targetWidth = header.ActualWidth - 32;
+            if (targetWidth > 0)
+            {
+                innerGrid.Width = targetWidth;
+            }
+        }
     }
 }
