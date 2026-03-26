@@ -1,0 +1,15 @@
+đề bài: lưu trữ trạng thái device đang có và thông tin device
+có 2 bảng dữ liệu chính: model và device, mỗi device sẽ thuộc về 1 model, 1 model sẽ có nhiều device.
+model (id, name, manufacturer, category, subcategory, available)
+device(id, modelId, name, imei, serialLab, serialNumber, cicuiseri, hwversion)
+tạo giao diện 
+Tab 1: Cung cấp giao diện xem theo từng  Model, sử dụng datagrid. Header có thể filter, sort.
+Mượn device bằng cách ấn nut Borrow ở cột function (nằm ở cuối cùng) và có thể chon số lương device muốn mượn trong trường hợp có nhiều device available. 
+Tab 2: Danh sách riêng Device. Hiển thị toàn bộ các Record chi tiết. Các Record đã được mượn sẽ được bôi màu đỏ tự động. Tương tự Tab 1, bạn hoàn toàn có thể sắp xếp và lọc mọi cột.
+Có phân trang, hiển thị row perpage 10,20,30,50.
+Có khả năng mở mutil instances (các process độc lập) của app để kiểm tra sự đồng bộ về mặt dữ liệu (ví dụ, mở 2 instance A và B, instance A mượn device X thì X phải biến mất ở danh sách model cứa instance B,)
+
+sử dụng cơ sở dữ liệu postgres localhost 5432 user name: postgres, pass: root, db: DeviceSrvDb
+ứng dụng winUI, table sử dụng DataGrid của common toolkit .net
+
+

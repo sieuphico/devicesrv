@@ -20,7 +20,7 @@ namespace SRV
         {
             return isBorrowed 
                 ? new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Red) 
-                : (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["TextFillColorPrimaryBrush"];
+                : new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Black);
         }
 
         private void BorrowButton_Click(object sender, RoutedEventArgs e)
@@ -45,39 +45,6 @@ namespace SRV
             ViewModel.LoadDevicesCommand.Execute(null);
         }
 
-        private void DataGrid_Sorting(object sender, CommunityToolkit.WinUI.UI.Controls.DataGridColumnEventArgs e)
-        {
-            if (e.Column.Tag is string col)
-            {
-                // Check which DataGrid is sorting by looking at the parent or ItemsSource
-                if (sender is CommunityToolkit.WinUI.UI.Controls.DataGrid dg)
-                {
-                    if (dg.ItemsSource == ViewModel.Models)
-                    {
-                        ViewModel.SortModelsCommand.Execute(col);
-                    }
-                    else if (dg.ItemsSource == ViewModel.Devices)
-                    {
-                        ViewModel.SortDevicesCommand.Execute(col);
-                    }
-
-                    // Reset sort markers on other columns
-                    foreach (var column in dg.Columns)
-                    {
-                        if (column != e.Column)
-                        {
-                            column.SortDirection = null;
-                        }
-                    }
-
-                    // Set sort marker on current column
-                    bool isAsc = (dg.ItemsSource == ViewModel.Models) ? ViewModel.ModelSortAscending : ViewModel.DeviceSortAscending;
-                    e.Column.SortDirection = isAsc 
-                        ? CommunityToolkit.WinUI.UI.Controls.DataGridSortDirection.Ascending 
-                        : CommunityToolkit.WinUI.UI.Controls.DataGridSortDirection.Descending;
-                }
-            }
-        }
     }
 }
 

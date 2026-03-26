@@ -92,7 +92,7 @@ namespace SRV.ViewModels
         [ObservableProperty] private bool _canGoModelNext;
 
         [RelayCommand]
-        public async Task LoadModelsAsync()
+        public async Task LoadModels()
         {
             var (models, total) = await _deviceService.GetWarehouseModelsAsync(
                 ModelCategoryFilter, ModelNameFilter, ModelManufacturerFilter, 
@@ -120,7 +120,7 @@ namespace SRV.ViewModels
         }
 
         [RelayCommand]
-        private async Task BorrowAsync(ModelDto dto)
+        private async Task Borrow(ModelDto dto)
         {
             if (dto == null || dto.QuantityToBorrow <= 0 || dto.QuantityToBorrow > dto.Data.Available) return;
             await _deviceService.BorrowDevicesAsync(dto.Data.Id, dto.QuantityToBorrow);
@@ -157,7 +157,7 @@ namespace SRV.ViewModels
         [ObservableProperty] private bool _canGoDeviceNext;
 
         [RelayCommand]
-        public async Task LoadDevicesAsync()
+        public async Task LoadDevices()
         {
             var (devices, total) = await _deviceService.GetAllDevicesAsync(
                 DeviceNameFilter, DeviceImeiFilter, DeviceModelNameFilter, 

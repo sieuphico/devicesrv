@@ -1,0 +1,6 @@
+<Solution>
+    <Project Path="DeviceSrv.csproj">
+        <Platform Solution="Release|*" Project="x64" />
+        <Deploy />
+    </Project>
+</Solution>
