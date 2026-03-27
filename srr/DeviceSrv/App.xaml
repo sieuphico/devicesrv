@@ -15,6 +15,7 @@
             <local:BoolToColorConverter x:Key="BoolToColor"/>
             <local:StringFormatConverter x:Key="StringFormat"/>
             <local:GreaterThanOneConverter x:Key="GreaterThanOne"/>
+            <local:BoolToBorrowReturnConverter x:Key="BoolToBorrowReturn"/>
 
             <!-- Other app resources here -->
 

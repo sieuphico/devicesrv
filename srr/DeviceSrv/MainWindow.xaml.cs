@@ -93,6 +93,50 @@ namespace DeviceSrv
             }
         }
 
+        private void FirstPage_Click(object sender, RoutedEventArgs e)
+        {
+            ViewModel.CurrentPage = 1;
+        }
+
+        private void LastPage_Click(object sender, RoutedEventArgs e)
+        {
+            ViewModel.CurrentPage = ViewModel.TotalPages;
+        }
+
+        private void ModelPrevPage_Click(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel.CanGoModelPrev)
+            {
+                ViewModel.ModelCurrentPage--;
+            }
+        }
+
+        private void ModelNextPage_Click(object sender, RoutedEventArgs e)
+        {
+            if (ViewModel.CanGoModelNext)
+            {
+                ViewModel.ModelCurrentPage++;
+            }
+        }
+
+        private void ModelFirstPage_Click(object sender, RoutedEventArgs e)
+        {
+            ViewModel.ModelCurrentPage = 1;
+        }
+
+        private void ModelLastPage_Click(object sender, RoutedEventArgs e)
+        {
+            ViewModel.ModelCurrentPage = ViewModel.ModelTotalPages;
+        }
+
+        private void ToggleDevice_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.DataContext is Device device)
+            {
+                ViewModel.ToggleDeviceBorrowStatus(device);
+            }
+        }
+
         private void FilterGrid_Loaded(object sender, RoutedEventArgs e)
         {
             if (sender is Grid grid)

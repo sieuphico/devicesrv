@@ -36,9 +36,10 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     
-                    <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,10">
+                    <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,10" Grid.Row="0">
                         <TextBlock Text="Device Model Management" Style="{StaticResource HeaderTextBlockStyle}"/>
                         <Button Click="Refresh_Click">
                             <StackPanel Orientation="Horizontal" Spacing="5">
@@ -168,6 +169,35 @@
                             </controls:DataGridTemplateColumn>
                         </controls:DataGrid.Columns>
                     </controls:DataGrid>
+
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="20" HorizontalAlignment="Right" Margin="0,10,0,0">
+                        <StackPanel Orientation="Horizontal" Spacing="5">
+                            <TextBlock Text="Total:" VerticalAlignment="Center"/>
+                            <TextBlock Text="{x:Bind ViewModel.ModelTotalCount, Mode=OneWay}" VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Spacing="5">
+                            <TextBlock Text="Rows per page:" VerticalAlignment="Center"/>
+                            <ComboBox SelectedValue="{x:Bind ViewModel.ModelPageSize, Mode=TwoWay}" Width="80">
+                                <x:Int32>10</x:Int32>
+                                <x:Int32>20</x:Int32>
+                                <x:Int32>30</x:Int32>
+                                <x:Int32>50</x:Int32>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Button Content="&lt;&lt;" Click="ModelFirstPage_Click" IsEnabled="{x:Bind ViewModel.CanGoModelPrev, Mode=OneWay}"/>
+                            <Button Content="&lt;" Click="ModelPrevPage_Click" IsEnabled="{x:Bind ViewModel.CanGoModelPrev, Mode=OneWay}"/>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="{x:Bind ViewModel.ModelCurrentPage, Mode=OneWay}"/>
+                                <TextBlock Text=" / "/>
+                                <TextBlock Text="{x:Bind ViewModel.ModelTotalPages, Mode=OneWay}"/>
+                            </StackPanel>
+                            <Button Content="&gt;" Click="ModelNextPage_Click" IsEnabled="{x:Bind ViewModel.CanGoModelNext, Mode=OneWay}"/>
+                            <Button Content="&gt;&gt;" Click="ModelLastPage_Click" IsEnabled="{x:Bind ViewModel.CanGoModelNext, Mode=OneWay}"/>
+                        </StackPanel>
+                    </StackPanel>
                 </Grid>
             </TabViewItem>
 
@@ -283,7 +313,18 @@
                                 </controls:DataGridTemplateColumn.CellTemplate>
                             </controls:DataGridTemplateColumn>
 
-                            <controls:DataGridCheckBoxColumn Header="Borrowed" Binding="{Binding IsBorrowed}" Width="100" Tag="IsBorrowed"/>
+                             <controls:DataGridCheckBoxColumn Header="Borrowed" Binding="{Binding IsBorrowed}" Width="100" Tag="IsBorrowed"/>
+                            
+                            <controls:DataGridTemplateColumn Header="Function" Width="100">
+                                <controls:DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="models:Device">
+                                        <Button Content="{Binding IsBorrowed, Converter={StaticResource BoolToBorrowReturn}}" 
+                                                Click="ToggleDevice_Click"
+                                                VerticalAlignment="Center"
+                                                HorizontalAlignment="Center"/>
+                                    </DataTemplate>
+                                </controls:DataGridTemplateColumn.CellTemplate>
+                            </controls:DataGridTemplateColumn>
                         </controls:DataGrid.Columns>
                     </controls:DataGrid>
 
@@ -304,6 +345,7 @@
                         </StackPanel>
 
                         <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Button Content="&lt;&lt;" Click="FirstPage_Click" IsEnabled="{x:Bind ViewModel.CanGoPrev, Mode=OneWay}"/>
                             <Button Content="&lt;" Click="PrevPage_Click" IsEnabled="{x:Bind ViewModel.CanGoPrev, Mode=OneWay}"/>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <TextBlock Text="{x:Bind ViewModel.CurrentPage, Mode=OneWay}"/>
@@ -311,6 +353,7 @@
                                 <TextBlock Text="{x:Bind ViewModel.TotalPages, Mode=OneWay}"/>
                             </StackPanel>
                             <Button Content="&gt;" Click="NextPage_Click" IsEnabled="{x:Bind ViewModel.CanGoNext, Mode=OneWay}"/>
+                            <Button Content="&gt;&gt;" Click="LastPage_Click" IsEnabled="{x:Bind ViewModel.CanGoNext, Mode=OneWay}"/>
                         </StackPanel>
                     </StackPanel>
                 </Grid>

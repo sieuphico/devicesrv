@@ -27,7 +27,7 @@ namespace DeviceSrv.ViewModels
         public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
 
         // Sorting
-        private string _modelOrderBy = "Name";
+        private string _modelOrderBy = "Id";
         public string ModelOrderBy { get => _modelOrderBy; set { _modelOrderBy = value; OnPropertyChanged(); } }
         private bool _modelIsDescending = false;
         public bool ModelIsDescending { get => _modelIsDescending; set { _modelIsDescending = value; OnPropertyChanged(); } }
@@ -39,29 +39,31 @@ namespace DeviceSrv.ViewModels
 
         public void UpdateModelSort(string orderBy, bool isDescending)
         {
-            System.Diagnostics.Debug.WriteLine($"[SORT LOG] Requesting Model Sort: Column={orderBy}, Descending={isDescending}");
             _modelOrderBy = orderBy;
             _modelIsDescending = isDescending;
             OnPropertyChanged(nameof(ModelOrderBy));
             OnPropertyChanged(nameof(ModelIsDescending));
+            _modelCurrentPage = 1; // Reset to first page on sort
+            OnPropertyChanged(nameof(ModelCurrentPage));
             _ = LoadModelsAsync();
         }
 
         public void UpdateDeviceSort(string orderBy, bool isDescending)
         {
-            System.Diagnostics.Debug.WriteLine($"[SORT LOG] Requesting Device Sort: Column={orderBy}, Descending={isDescending}");
             _deviceOrderBy = orderBy;
             _deviceIsDescending = isDescending;
             OnPropertyChanged(nameof(DeviceOrderBy));
             OnPropertyChanged(nameof(DeviceIsDescending));
+            _currentPage = 1; // Reset to first page on sort
+            OnPropertyChanged(nameof(CurrentPage));
             _ = LoadDevicesAsync();
         }
 
         // Model Filters
         private string _modelNameFilter = "";
-        public string ModelNameFilter { get => _modelNameFilter; set { _modelNameFilter = value; OnPropertyChanged(); LoadModelsAsync(); } }
+        public string ModelNameFilter { get => _modelNameFilter; set { _modelNameFilter = value; OnPropertyChanged(); _modelCurrentPage = 1; LoadModelsAsync(); } }
         private string _modelManufacturerFilter = "";
-        public string ModelManufacturerFilter { get => _modelManufacturerFilter; set { _modelManufacturerFilter = value; OnPropertyChanged(); LoadModelsAsync(); } }
+        public string ModelManufacturerFilter { get => _modelManufacturerFilter; set { _modelManufacturerFilter = value; OnPropertyChanged(); _modelCurrentPage = 1; LoadModelsAsync(); } }
         
         private bool _isUpdatingCategories = false;
         private string _modelCategoryFilter = "All";
@@ -76,6 +78,7 @@ namespace DeviceSrv.ViewModels
                     OnPropertyChanged(); 
                     if (!_isUpdatingCategories) 
                     {
+                        _modelCurrentPage = 1;
                         LoadModelsAsync(); 
                     }
                 }
@@ -84,18 +87,29 @@ namespace DeviceSrv.ViewModels
 
         // Device Filters
         private string _deviceNameFilter = "";
-        public string DeviceNameFilter { get => _deviceNameFilter; set { _deviceNameFilter = value; OnPropertyChanged(); LoadDevicesAsync(); } }
+        public string DeviceNameFilter { get => _deviceNameFilter; set { _deviceNameFilter = value; OnPropertyChanged(); _currentPage = 1; LoadDevicesAsync(); } }
         private string _deviceImeiFilter = "";
-        public string DeviceImeiFilter { get => _deviceImeiFilter; set { _deviceImeiFilter = value; OnPropertyChanged(); LoadDevicesAsync(); } }
+        public string DeviceImeiFilter { get => _deviceImeiFilter; set { _deviceImeiFilter = value; OnPropertyChanged(); _currentPage = 1; LoadDevicesAsync(); } }
         private string _deviceSnFilter = "";
-        public string DeviceSnFilter { get => _deviceSnFilter; set { _deviceSnFilter = value; OnPropertyChanged(); LoadDevicesAsync(); } }
+        public string DeviceSnFilter { get => _deviceSnFilter; set { _deviceSnFilter = value; OnPropertyChanged(); _currentPage = 1; LoadDevicesAsync(); } }
 
-        // Pagination
+        // Model Pagination
+        private int _modelPageSize = 10;
+        public int ModelPageSize { get => _modelPageSize; set { _modelPageSize = value; OnPropertyChanged(); LoadModelsAsync(); } }
+        private int _modelTotalCount;
+        public int ModelTotalCount { get => _modelTotalCount; set { _modelTotalCount = value; OnPropertyChanged(); OnPropertyChanged(nameof(ModelTotalPages)); OnPropertyChanged(nameof(CanGoModelPrev)); OnPropertyChanged(nameof(CanGoModelNext)); } }
+        public int ModelTotalPages => (int)Math.Ceiling((double)ModelTotalCount / Math.Max(1, ModelPageSize));
+        public bool CanGoModelPrev => ModelCurrentPage > 1;
+        public bool CanGoModelNext => ModelCurrentPage < ModelTotalPages;
+        private int _modelCurrentPage = 1;
+        public int ModelCurrentPage { get => _modelCurrentPage; set { _modelCurrentPage = value; OnPropertyChanged(); OnPropertyChanged(nameof(CanGoModelPrev)); OnPropertyChanged(nameof(CanGoModelNext)); LoadModelsAsync(); } }
+
+        // Device Pagination
         private int _pageSize = 10;
         public int PageSize { get => _pageSize; set { _pageSize = value; OnPropertyChanged(); LoadDevicesAsync(); } }
         private int _totalCount;
         public int TotalCount { get => _totalCount; set { _totalCount = value; OnPropertyChanged(); OnPropertyChanged(nameof(TotalPages)); OnPropertyChanged(nameof(CanGoPrev)); OnPropertyChanged(nameof(CanGoNext)); } }
-        public int TotalPages => (int)Math.Ceiling((double)TotalCount / PageSize);
+        public int TotalPages => (int)Math.Ceiling((double)TotalCount / Math.Max(1, PageSize));
         public bool CanGoPrev => CurrentPage > 1;
         public bool CanGoNext => CurrentPage < TotalPages;
         private int _currentPage = 1;
@@ -104,7 +118,7 @@ namespace DeviceSrv.ViewModels
         public MainViewModel()
         {
             InitializeAsync();
-            _syncTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
+            _syncTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(30) }; // Reduced sync frequency for stability
             _syncTimer.Tick += (s, e) => { RefreshAllAsync(); };
             _syncTimer.Start();
         }
@@ -114,6 +128,7 @@ namespace DeviceSrv.ViewModels
             try
             {
                 ErrorMessage = "";
+                await LoadCategoriesAsync();
                 await LoadModelsAsync();
                 await LoadDevicesAsync();
             }
@@ -123,48 +138,45 @@ namespace DeviceSrv.ViewModels
             }
         }
 
+        public async Task LoadCategoriesAsync()
+        {
+            try
+            {
+                var categories = await _deviceService.GetDistinctCategoriesAsync();
+                var categoryList = categories.ToList();
+                categoryList.Insert(0, "All");
+
+                _isUpdatingCategories = true;
+                ModelCategories.Clear();
+                foreach (var cat in categoryList) ModelCategories.Add(cat);
+                
+                if (string.IsNullOrEmpty(ModelCategoryFilter) || !ModelCategories.Contains(ModelCategoryFilter))
+                    ModelCategoryFilter = "All";
+                
+                _isUpdatingCategories = false;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error loading categories: {ex.Message}");
+            }
+        }
+
         public async Task LoadModelsAsync()
         {
             try
             {
-                System.Diagnostics.Debug.WriteLine($"[SORT LOG] Executing Model DB Query: ORDER BY {ModelOrderBy} {(ModelIsDescending ? "DESC" : "ASC")}");
-                var models = await _deviceService.GetModelsAsync(ModelOrderBy, ModelIsDescending);
-                System.Diagnostics.Debug.WriteLine($"[SORT LOG] Loaded {models.Count()} Models from DB.");
+                var (models, total) = await _deviceService.GetModelsPagedAsync(
+                    ModelCurrentPage, 
+                    ModelPageSize, 
+                    ModelOrderBy, 
+                    ModelIsDescending, 
+                    ModelNameFilter, 
+                    ModelManufacturerFilter, 
+                    ModelCategoryFilter);
                 
-                // Extract unique categories (once or merge carefully to avoid resetting selection loop)
-                var uniqueCategories = models.Select(m => m.Category).Where(c => !string.IsNullOrEmpty(c)).Distinct().OrderBy(c => c).ToList();
-                uniqueCategories.Insert(0, "All");
-                
-                if (!ModelCategories.SequenceEqual(uniqueCategories))
-                {
-                    _isUpdatingCategories = true;
-                    var oldFilter = ModelCategoryFilter;
-                    
-                    ModelCategories.Clear();
-                    foreach (var cat in uniqueCategories)
-                    {
-                        ModelCategories.Add(cat);
-                    }
-                    
-                    if (oldFilter != null && ModelCategories.Contains(oldFilter))
-                    {
-                        ModelCategoryFilter = oldFilter;
-                    }
-                    else
-                    {
-                        ModelCategoryFilter = "All";
-                    }
-                    _isUpdatingCategories = false;
-                }
-
-                var filtered = models.Where(m => 
-                    (string.IsNullOrEmpty(ModelNameFilter) || m.Name.Contains(ModelNameFilter, StringComparison.OrdinalIgnoreCase)) &&
-                    (string.IsNullOrEmpty(ModelManufacturerFilter) || m.Manufacturer.Contains(ModelManufacturerFilter, StringComparison.OrdinalIgnoreCase)) &&
-                    (ModelCategoryFilter == "All" || m.Category == ModelCategoryFilter)
-                );
-
                 Models.Clear();
-                foreach (var m in filtered) Models.Add(m);
+                foreach (var m in models) Models.Add(m);
+                ModelTotalCount = total;
                 ErrorMessage = "";
             }
             catch (Exception ex)
@@ -193,8 +205,11 @@ namespace DeviceSrv.ViewModels
 
         public async void RefreshAllAsync()
         {
+            // Only refresh current pages
             await LoadModelsAsync();
             await LoadDevicesAsync();
+            // Occasionally refresh categories too?
+            _ = LoadCategoriesAsync();
         }
 
         public async void BorrowDevice(Model model, int quantity)
@@ -213,6 +228,38 @@ namespace DeviceSrv.ViewModels
             catch (Exception ex)
             {
                 ErrorMessage = $"Error borrowing device: {ex.Message}";
+            }
+        }
+
+        public async void ToggleDeviceBorrowStatus(Device device)
+        {
+            try
+            {
+                // Local Update for immediate feedback (Optimistic Update)
+                var oldStatus = device.IsBorrowed;
+                var modelId = device.ModelId;
+
+                var success = await _deviceService.ToggleDeviceBorrowStatusAsync(device.Id);
+                if (success)
+                {
+                    // Update the device status locally
+                    device.IsBorrowed = !oldStatus;
+                    
+                    // Update corresponding model's available count if it exists in the current view
+                    var model = Models.FirstOrDefault(m => m.Id == modelId);
+                    if (model != null)
+                    {
+                        model.Available += (device.IsBorrowed ? -1 : 1);
+                    }
+                    
+                    ErrorMessage = "";
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"Error toggling device status: {ex.Message}";
+                // Fallback: Reload all if out of sync
+                RefreshAllAsync();
             }
         }
 
