@@ -23,8 +23,8 @@ namespace DeviceSrv
         public object Convert(object value, Type targetType, object parameter, string language)
         {
             if (value is bool isBorrowed && isBorrowed)
-                return new SolidColorBrush(Colors.Red);
-            return new SolidColorBrush(Colors.Transparent);
+                return new SolidColorBrush(Microsoft.UI.ColorHelper.FromArgb(64, 255, 0, 0));
+            return new SolidColorBrush(Microsoft.UI.Colors.Transparent);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, string language) => throw new NotImplementedException();

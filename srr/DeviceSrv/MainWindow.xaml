@@ -15,6 +15,11 @@
         <Grid.Resources>
             <!-- BindingProxy is the bridge for stable HeaderTemplate filtering -->
             <local:BindingProxy x:Key="Proxy"/>
+            <SolidColorBrush x:Key="ShrimpPastePurple" Color="#5D3F6A"/>
+            <Style x:Key="BaseColumnHeaderStyle" TargetType="primitives:DataGridColumnHeader">
+                <Setter Property="Padding" Value="0"/>
+                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            </Style>
         </Grid.Resources>
         
         <Grid.RowDefinitions>
@@ -59,25 +64,49 @@
                                      Sorting="DataGrid_Sorting"
                                      RowHeight="70">
                         <controls:DataGrid.Columns>
-                            <controls:DataGridTextColumn Binding="{Binding Id}" Header="ID" Width="80" Tag="Id"/>
-                            
-                            <controls:DataGridTemplateColumn Width="*" Tag="Name" Header="Name">
+                            <controls:DataGridTemplateColumn Header="ID" Width="80" Tag="Id">
                                 <controls:DataGridTemplateColumn.HeaderStyle>
-                                    <Style TargetType="primitives:DataGridColumnHeader">
-                                        <Setter Property="Padding" Value="0"/>
-                                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                    <Style TargetType="primitives:DataGridColumnHeader" BasedOn="{StaticResource BaseColumnHeaderStyle}">
                                         <Setter Property="ContentTemplate">
                                             <Setter.Value>
                                                 <DataTemplate>
                                                     <Grid Loaded="FilterGrid_Loaded" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
                                                         <Grid.RowDefinitions>
-                                                            <RowDefinition Height="Auto"/>
-                                                            <RowDefinition Height="Auto"/>
+                                                            <RowDefinition Height="40"/>
+                                                            <RowDefinition Height="40"/>
                                                         </Grid.RowDefinitions>
-                                                        <Grid Grid.Row="0" Background="{ThemeResource SystemControlBackgroundChromeMediumLowBrush}" Padding="8,10" HorizontalAlignment="Stretch">
-                                                            <TextBlock Text="{Binding}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                                        <Grid Grid.Row="0" Background="{StaticResource ShrimpPastePurple}" HorizontalAlignment="Stretch">
+                                                            <TextBlock Text="{Binding}" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White" Margin="10,0"/>
                                                         </Grid>
-                                                        <AutoSuggestBox Grid.Row="1" Margin="2,2,2,4" PlaceholderText="Filter..." Height="32" HorizontalAlignment="Stretch" QueryIcon="Find"
+                                                        <Border Grid.Row="1" Height="40" Margin="2,0,2,0"/>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </controls:DataGridTemplateColumn.HeaderStyle>
+                                <controls:DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="models:Model">
+                                        <TextBlock Text="{Binding Id}" VerticalAlignment="Center" Margin="10,0"/>
+                                    </DataTemplate>
+                                </controls:DataGridTemplateColumn.CellTemplate>
+                            </controls:DataGridTemplateColumn>
+                            
+                            <controls:DataGridTemplateColumn Width="*" Tag="Name" Header="Name">
+                                <controls:DataGridTemplateColumn.HeaderStyle>
+                                    <Style TargetType="primitives:DataGridColumnHeader" BasedOn="{StaticResource BaseColumnHeaderStyle}">
+                                        <Setter Property="ContentTemplate">
+                                            <Setter.Value>
+                                                <DataTemplate>
+                                                    <Grid Loaded="FilterGrid_Loaded" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+                                                        <Grid.RowDefinitions>
+                                                            <RowDefinition Height="40"/>
+                                                            <RowDefinition Height="40"/>
+                                                        </Grid.RowDefinitions>
+                                                        <Grid Grid.Row="0" Background="{StaticResource ShrimpPastePurple}" HorizontalAlignment="Stretch">
+                                                            <TextBlock Text="{Binding}" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White" Margin="10,0"/>
+                                                        </Grid>
+                                                        <AutoSuggestBox Grid.Row="1" Margin="2,4,2,4" PlaceholderText="Filter..." Height="32" HorizontalAlignment="Stretch" QueryIcon="Find"
                                                                         Text="{Binding Source={StaticResource Proxy}, Path=Data.ModelNameFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                                                     </Grid>
                                                 </DataTemplate>
@@ -94,21 +123,19 @@
 
                             <controls:DataGridTemplateColumn Width="*" Tag="Manufacturer" Header="Manufacturer">
                                 <controls:DataGridTemplateColumn.HeaderStyle>
-                                    <Style TargetType="primitives:DataGridColumnHeader">
-                                        <Setter Property="Padding" Value="0"/>
-                                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                    <Style TargetType="primitives:DataGridColumnHeader" BasedOn="{StaticResource BaseColumnHeaderStyle}">
                                         <Setter Property="ContentTemplate">
                                             <Setter.Value>
                                                 <DataTemplate>
                                                     <Grid Loaded="FilterGrid_Loaded" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
                                                         <Grid.RowDefinitions>
-                                                            <RowDefinition Height="Auto"/>
-                                                            <RowDefinition Height="Auto"/>
+                                                            <RowDefinition Height="40"/>
+                                                            <RowDefinition Height="40"/>
                                                         </Grid.RowDefinitions>
-                                                        <Grid Grid.Row="0" Background="{ThemeResource SystemControlBackgroundChromeMediumLowBrush}" Padding="8,10" HorizontalAlignment="Stretch">
-                                                            <TextBlock Text="{Binding}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                                        <Grid Grid.Row="0" Background="{StaticResource ShrimpPastePurple}" HorizontalAlignment="Stretch">
+                                                            <TextBlock Text="{Binding}" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White" Margin="10,0"/>
                                                         </Grid>
-                                                        <AutoSuggestBox Grid.Row="1" Margin="2,2,2,4" PlaceholderText="Filter..." Height="32" HorizontalAlignment="Stretch" QueryIcon="Find"
+                                                        <AutoSuggestBox Grid.Row="1" Margin="2,4,2,4" PlaceholderText="Filter..." Height="32" HorizontalAlignment="Stretch" QueryIcon="Find"
                                                                         Text="{Binding Source={StaticResource Proxy}, Path=Data.ModelManufacturerFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                                                     </Grid>
                                                 </DataTemplate>
@@ -125,23 +152,21 @@
 
                             <controls:DataGridTemplateColumn Width="*" Tag="Category" Header="Category">
                                 <controls:DataGridTemplateColumn.HeaderStyle>
-                                    <Style TargetType="primitives:DataGridColumnHeader">
-                                        <Setter Property="Padding" Value="0"/>
-                                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                    <Style TargetType="primitives:DataGridColumnHeader" BasedOn="{StaticResource BaseColumnHeaderStyle}">
                                         <Setter Property="ContentTemplate">
                                             <Setter.Value>
                                                 <DataTemplate>
                                                     <Grid Loaded="FilterGrid_Loaded" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
                                                         <Grid.RowDefinitions>
-                                                            <RowDefinition Height="Auto"/>
-                                                            <RowDefinition Height="Auto"/>
+                                                            <RowDefinition Height="40"/>
+                                                            <RowDefinition Height="40"/>
                                                         </Grid.RowDefinitions>
-                                                        <Grid Grid.Row="0" Background="{ThemeResource SystemControlBackgroundChromeMediumLowBrush}" Padding="8,10" HorizontalAlignment="Stretch">
-                                                            <TextBlock Text="{Binding}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                                        <Grid Grid.Row="0" Background="{StaticResource ShrimpPastePurple}" HorizontalAlignment="Stretch">
+                                                            <TextBlock Text="{Binding}" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White" Margin="10,0"/>
                                                         </Grid>
-                                                        <ComboBox Grid.Row="1" Margin="2,2,2,4" ItemsSource="{Binding Source={StaticResource Proxy}, Path=Data.ModelCategories}"
+                                                        <ComboBox Grid.Row="1" Margin="2,4,2,4" ItemsSource="{Binding Source={StaticResource Proxy}, Path=Data.ModelCategories}"
                                                                   SelectedItem="{Binding Source={StaticResource Proxy}, Path=Data.ModelCategoryFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                                  Height="32" HorizontalAlignment="Stretch"/>
+                                                                  HorizontalAlignment="Stretch" Height="32"/>
                                                     </Grid>
                                                 </DataTemplate>
                                             </Setter.Value>
@@ -154,9 +179,55 @@
                                     </DataTemplate>
                                 </controls:DataGridTemplateColumn.CellTemplate>
                             </controls:DataGridTemplateColumn>
-                            <controls:DataGridTextColumn Header="Available" Binding="{Binding Available}" Width="*" Tag="Available"/>
+                            <controls:DataGridTemplateColumn Header="Available" Width="*" Tag="Available">
+                                <controls:DataGridTemplateColumn.HeaderStyle>
+                                    <Style TargetType="primitives:DataGridColumnHeader" BasedOn="{StaticResource BaseColumnHeaderStyle}">
+                                        <Setter Property="ContentTemplate">
+                                            <Setter.Value>
+                                                <DataTemplate>
+                                                    <Grid Loaded="FilterGrid_Loaded" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+                                                        <Grid.RowDefinitions>
+                                                            <RowDefinition Height="40"/>
+                                                            <RowDefinition Height="40"/>
+                                                        </Grid.RowDefinitions>
+                                                        <Grid Grid.Row="0" Background="{StaticResource ShrimpPastePurple}" HorizontalAlignment="Stretch">
+                                                            <TextBlock Text="{Binding}" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White" Margin="10,0"/>
+                                                        </Grid>
+                                                        <Border Grid.Row="1" Height="40" Margin="2,0,2,0"/>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </controls:DataGridTemplateColumn.HeaderStyle>
+                                <controls:DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="models:Model">
+                                        <TextBlock Text="{Binding Available}" VerticalAlignment="Center" Margin="10,0"/>
+                                    </DataTemplate>
+                                </controls:DataGridTemplateColumn.CellTemplate>
+                            </controls:DataGridTemplateColumn>
                             
                             <controls:DataGridTemplateColumn Header="Function" Width="100">
+                                <controls:DataGridTemplateColumn.HeaderStyle>
+                                    <Style TargetType="primitives:DataGridColumnHeader" BasedOn="{StaticResource BaseColumnHeaderStyle}">
+                                        <Setter Property="ContentTemplate">
+                                            <Setter.Value>
+                                                <DataTemplate>
+                                                    <Grid Loaded="FilterGrid_Loaded" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+                                                        <Grid.RowDefinitions>
+                                                            <RowDefinition Height="40"/>
+                                                            <RowDefinition Height="40"/>
+                                                        </Grid.RowDefinitions>
+                                                        <Grid Grid.Row="0" Background="{StaticResource ShrimpPastePurple}" HorizontalAlignment="Stretch">
+                                                            <TextBlock Text="{Binding}" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White" Margin="10,0"/>
+                                                        </Grid>
+                                                        <Border Grid.Row="1" Height="40" Margin="2,0,2,0"/>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </controls:DataGridTemplateColumn.HeaderStyle>
                                 <controls:DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate x:DataType="models:Model">
                                         <Button Content="Borrow" 
