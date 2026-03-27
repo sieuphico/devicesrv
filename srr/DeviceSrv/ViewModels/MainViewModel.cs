@@ -61,9 +61,9 @@ namespace DeviceSrv.ViewModels
 
         // Model Filters
         private string _modelNameFilter = "";
-        public string ModelNameFilter { get => _modelNameFilter; set { _modelNameFilter = value; OnPropertyChanged(); _modelCurrentPage = 1; LoadModelsAsync(); } }
+        public string ModelNameFilter { get => _modelNameFilter; set { _modelNameFilter = value; OnPropertyChanged(); _modelCurrentPage = 1; _ = LoadModelsAsync(); } }
         private string _modelManufacturerFilter = "";
-        public string ModelManufacturerFilter { get => _modelManufacturerFilter; set { _modelManufacturerFilter = value; OnPropertyChanged(); _modelCurrentPage = 1; LoadModelsAsync(); } }
+        public string ModelManufacturerFilter { get => _modelManufacturerFilter; set { _modelManufacturerFilter = value; OnPropertyChanged(); _modelCurrentPage = 1; _ = LoadModelsAsync(); } }
         
         private bool _isUpdatingCategories = false;
         private string _modelCategoryFilter = "All";
@@ -87,11 +87,11 @@ namespace DeviceSrv.ViewModels
 
         // Device Filters
         private string _deviceNameFilter = "";
-        public string DeviceNameFilter { get => _deviceNameFilter; set { _deviceNameFilter = value; OnPropertyChanged(); _currentPage = 1; LoadDevicesAsync(); } }
+        public string DeviceNameFilter { get => _deviceNameFilter; set { _deviceNameFilter = value; OnPropertyChanged(); _currentPage = 1; _ = LoadDevicesAsync(); } }
         private string _deviceImeiFilter = "";
-        public string DeviceImeiFilter { get => _deviceImeiFilter; set { _deviceImeiFilter = value; OnPropertyChanged(); _currentPage = 1; LoadDevicesAsync(); } }
+        public string DeviceImeiFilter { get => _deviceImeiFilter; set { _deviceImeiFilter = value; OnPropertyChanged(); _currentPage = 1; _ = LoadDevicesAsync(); } }
         private string _deviceSnFilter = "";
-        public string DeviceSnFilter { get => _deviceSnFilter; set { _deviceSnFilter = value; OnPropertyChanged(); _currentPage = 1; LoadDevicesAsync(); } }
+        public string DeviceSnFilter { get => _deviceSnFilter; set { _deviceSnFilter = value; OnPropertyChanged(); _currentPage = 1; _ = LoadDevicesAsync(); } }
 
         // Model Pagination
         private int _modelPageSize = 10;

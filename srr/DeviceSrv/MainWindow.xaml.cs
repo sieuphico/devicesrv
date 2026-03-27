@@ -8,13 +8,12 @@ namespace DeviceSrv
 {
     public partial class MainWindow : Window
     {
-        public MainViewModel ViewModel { get; }
+        public ViewModels.MainViewModel ViewModel { get; } = new();
 
         public MainWindow()
         {
             this.InitializeComponent();
-            ViewModel = new MainViewModel();
-            RootGrid.DataContext = ViewModel;
+            RootGrid.DataContext = this;
 
             // Bridge the ViewModel to the stable BindingProxy
             if (RootGrid.Resources["Proxy"] is BindingProxy proxy)
@@ -27,28 +26,18 @@ namespace DeviceSrv
         {
             if (sender is DataGrid grid)
             {
-                // Toggle sort direction: Usually null initially, so we default to Ascending first click.
-                var isDescending = e.Column.SortDirection == DataGridSortDirection.Ascending;
+                var orderBy = e.Column.Tag?.ToString() ?? "Id";
+                var isDescending = e.Column.SortDirection == null || e.Column.SortDirection == DataGridSortDirection.Ascending;
                 
-                // Clear other columns' sort indicators
-                foreach (var column in grid.Columns)
+                foreach (var col in grid.Columns)
                 {
-                    column.SortDirection = null;
+                    if (col != e.Column) col.SortDirection = null;
                 }
-
+                
                 e.Column.SortDirection = isDescending ? DataGridSortDirection.Descending : DataGridSortDirection.Ascending;
-
-                var columnName = e.Column.Tag?.ToString() ?? "Id";
-                System.Diagnostics.Debug.WriteLine($"[SORT LOG] UI Grid Clicked: Header={e.Column.Header}, ColumnTag={columnName}, Descending={isDescending}");
                 
-                if (grid == ModelGrid)
-                {
-                    ViewModel.UpdateModelSort(columnName, isDescending);
-                }
-                else if (grid == DeviceGrid)
-                {
-                    ViewModel.UpdateDeviceSort(columnName, isDescending);
-                }
+                if (grid == ModelGrid) ViewModel.UpdateModelSort(orderBy, isDescending);
+                else if (grid == DeviceGrid) ViewModel.UpdateDeviceSort(orderBy, isDescending);
             }
         }
 
@@ -64,10 +53,7 @@ namespace DeviceSrv
             }
         }
 
-        private void Refresh_Click(object sender, RoutedEventArgs e)
-        {
-            ViewModel.RefreshAllAsync();
-        }
+        private void Refresh_Click(object sender, RoutedEventArgs e) => ViewModel.RefreshAllAsync();
 
         private void Borrow_Click(object sender, RoutedEventArgs e)
         {
@@ -79,18 +65,12 @@ namespace DeviceSrv
 
         private void PrevPage_Click(object sender, RoutedEventArgs e)
         {
-            if (ViewModel.CanGoPrev)
-            {
-                ViewModel.CurrentPage--;
-            }
+            if (ViewModel.CanGoPrev) ViewModel.CurrentPage--;
         }
 
         private void NextPage_Click(object sender, RoutedEventArgs e)
         {
-            if (ViewModel.CanGoNext)
-            {
-                ViewModel.CurrentPage++;
-            }
+            if (ViewModel.CanGoNext) ViewModel.CurrentPage++;
         }
 
         private void FirstPage_Click(object sender, RoutedEventArgs e)
@@ -105,18 +85,12 @@ namespace DeviceSrv
 
         private void ModelPrevPage_Click(object sender, RoutedEventArgs e)
         {
-            if (ViewModel.CanGoModelPrev)
-            {
-                ViewModel.ModelCurrentPage--;
-            }
+            if (ViewModel.CanGoModelPrev) ViewModel.ModelCurrentPage--;
         }
 
         private void ModelNextPage_Click(object sender, RoutedEventArgs e)
         {
-            if (ViewModel.CanGoModelNext)
-            {
-                ViewModel.ModelCurrentPage++;
-            }
+            if (ViewModel.CanGoModelNext) ViewModel.ModelCurrentPage++;
         }
 
         private void ModelFirstPage_Click(object sender, RoutedEventArgs e)
@@ -139,12 +113,9 @@ namespace DeviceSrv
 
         private void FilterGrid_Loaded(object sender, RoutedEventArgs e)
         {
-            if (sender is Grid grid)
+            if (sender is FrameworkElement fe)
             {
-                // Clear any manual widths if set previously
-                grid.Width = double.NaN; 
-            
-                Microsoft.UI.Xaml.DependencyObject parent = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetParent(grid);
+                var parent = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetParent(fe);
                 while (parent != null && !(parent is CommunityToolkit.WinUI.UI.Controls.Primitives.DataGridColumnHeader))
                 {
                     parent = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetParent(parent);
@@ -152,7 +123,6 @@ namespace DeviceSrv
                 
                 if (parent is CommunityToolkit.WinUI.UI.Controls.Primitives.DataGridColumnHeader header)
                 {
-                    // Unbind ContentPresenter from Auto Column constraints and force Stretch
                     var presenter = FindVisualChildByType<Microsoft.UI.Xaml.Controls.ContentPresenter>(header);
                     if (presenter != null)
                     {
@@ -161,7 +131,6 @@ namespace DeviceSrv
                         presenter.HorizontalContentAlignment = Microsoft.UI.Xaml.HorizontalAlignment.Stretch;
                     }
 
-                    // Reposition SortIcon perfectly inside Row 0
                     var sortIcon = FindVisualChildByName<Microsoft.UI.Xaml.Controls.FontIcon>(header, "SortIcon");
                     if (sortIcon != null)
                     {
@@ -178,10 +147,7 @@ namespace DeviceSrv
             for (int i = 0; i < Microsoft.UI.Xaml.Media.VisualTreeHelper.GetChildrenCount(parent); i++)
             {
                 var child = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetChild(parent, i);
-                if (child is T typedChild && (child as Microsoft.UI.Xaml.FrameworkElement)?.Name == name)
-                {
-                    return typedChild;
-                }
+                if (child is T typedChild && (child as Microsoft.UI.Xaml.FrameworkElement)?.Name == name) return typedChild;
                 var result = FindVisualChildByName<T>(child, name);
                 if (result != null) return result;
             }
@@ -193,10 +159,7 @@ namespace DeviceSrv
             for (int i = 0; i < Microsoft.UI.Xaml.Media.VisualTreeHelper.GetChildrenCount(parent); i++)
             {
                 var child = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetChild(parent, i);
-                if (child is T typedChild)
-                {
-                    return typedChild;
-                }
+                if (child is T typedChild) return typedChild;
                 var result = FindVisualChildByType<T>(child);
                 if (result != null) return result;
             }

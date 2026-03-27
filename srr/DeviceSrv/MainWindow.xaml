@@ -13,12 +13,135 @@
 
     <Grid x:Name="RootGrid">
         <Grid.Resources>
-            <!-- BindingProxy is the bridge for stable HeaderTemplate filtering -->
+            <!-- BindingProxy for stable HeaderTemplate filtering -->
             <local:BindingProxy x:Key="Proxy"/>
+            
             <SolidColorBrush x:Key="ShrimpPastePurple" Color="#5D3F6A"/>
+            
             <Style x:Key="BaseColumnHeaderStyle" TargetType="primitives:DataGridColumnHeader">
                 <Setter Property="Padding" Value="0"/>
                 <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            </Style>
+
+            <!-- Reusable Header Style WITHOUT Filter -->
+            <Style x:Key="NoFilterHeaderStyle" TargetType="primitives:DataGridColumnHeader" BasedOn="{StaticResource BaseColumnHeaderStyle}">
+                <Setter Property="ContentTemplate">
+                    <Setter.Value>
+                        <DataTemplate>
+                            <Grid Loaded="FilterGrid_Loaded" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+                                <Grid.RowDefinitions><RowDefinition Height="40"/><RowDefinition Height="40"/></Grid.RowDefinitions>
+                                <Grid Grid.Row="0" Background="{StaticResource ShrimpPastePurple}" HorizontalAlignment="Stretch">
+                                    <TextBlock Text="{Binding}" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White" Margin="10,0"/>
+                                </Grid>
+                                <Border Grid.Row="1" Height="40" Margin="2,0,2,0"/>
+                            </Grid>
+                        </DataTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Individual Styles for each Filter Property (Stable & Performant) -->
+            <Style x:Key="ModelNameHeaderStyle" TargetType="primitives:DataGridColumnHeader" BasedOn="{StaticResource BaseColumnHeaderStyle}">
+                <Setter Property="ContentTemplate">
+                    <Setter.Value>
+                        <DataTemplate>
+                            <Grid Loaded="FilterGrid_Loaded" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+                                <Grid.RowDefinitions><RowDefinition Height="40"/><RowDefinition Height="40"/></Grid.RowDefinitions>
+                                <Grid Grid.Row="0" Background="{StaticResource ShrimpPastePurple}" HorizontalAlignment="Stretch">
+                                    <TextBlock Text="{Binding}" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White" Margin="10,0"/>
+                                </Grid>
+                                <AutoSuggestBox Grid.Row="1" Margin="2,4,2,4" PlaceholderText="Filter..." Height="32" HorizontalAlignment="Stretch" QueryIcon="Find"
+                                                Text="{Binding Source={StaticResource Proxy}, Path=Data.ModelNameFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="ModelManufacturerHeaderStyle" TargetType="primitives:DataGridColumnHeader" BasedOn="{StaticResource BaseColumnHeaderStyle}">
+                <Setter Property="ContentTemplate">
+                    <Setter.Value>
+                        <DataTemplate>
+                            <Grid Loaded="FilterGrid_Loaded" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+                                <Grid.RowDefinitions><RowDefinition Height="40"/><RowDefinition Height="40"/></Grid.RowDefinitions>
+                                <Grid Grid.Row="0" Background="{StaticResource ShrimpPastePurple}" HorizontalAlignment="Stretch">
+                                    <TextBlock Text="{Binding}" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White" Margin="10,0"/>
+                                </Grid>
+                                <AutoSuggestBox Grid.Row="1" Margin="2,4,2,4" PlaceholderText="Filter..." Height="32" HorizontalAlignment="Stretch" QueryIcon="Find"
+                                                Text="{Binding Source={StaticResource Proxy}, Path=Data.ModelManufacturerFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="ModelCategoryHeaderStyle" TargetType="primitives:DataGridColumnHeader" BasedOn="{StaticResource BaseColumnHeaderStyle}">
+                <Setter Property="ContentTemplate">
+                    <Setter.Value>
+                        <DataTemplate>
+                            <Grid Loaded="FilterGrid_Loaded" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+                                <Grid.RowDefinitions><RowDefinition Height="40"/><RowDefinition Height="40"/></Grid.RowDefinitions>
+                                <Grid Grid.Row="0" Background="{StaticResource ShrimpPastePurple}" HorizontalAlignment="Stretch">
+                                    <TextBlock Text="{Binding}" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White" Margin="10,0"/>
+                                </Grid>
+                                <ComboBox Grid.Row="1" Margin="2,4,2,4" ItemsSource="{Binding Source={StaticResource Proxy}, Path=Data.ModelCategories}"
+                                          SelectedItem="{Binding Source={StaticResource Proxy}, Path=Data.ModelCategoryFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                          HorizontalAlignment="Stretch" Height="32"/>
+                            </Grid>
+                        </DataTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="DeviceNameHeaderStyle" TargetType="primitives:DataGridColumnHeader" BasedOn="{StaticResource BaseColumnHeaderStyle}">
+                <Setter Property="ContentTemplate">
+                    <Setter.Value>
+                        <DataTemplate>
+                            <Grid Loaded="FilterGrid_Loaded" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+                                <Grid.RowDefinitions><RowDefinition Height="40"/><RowDefinition Height="40"/></Grid.RowDefinitions>
+                                <Grid Grid.Row="0" Background="{StaticResource ShrimpPastePurple}" HorizontalAlignment="Stretch">
+                                    <TextBlock Text="{Binding}" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White" Margin="10,0"/>
+                                </Grid>
+                                <AutoSuggestBox Grid.Row="1" Margin="2,4,2,4" PlaceholderText="Search..." Height="32" HorizontalAlignment="Stretch" QueryIcon="Find"
+                                                Text="{Binding Source={StaticResource Proxy}, Path=Data.DeviceNameFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="DeviceImeiHeaderStyle" TargetType="primitives:DataGridColumnHeader" BasedOn="{StaticResource BaseColumnHeaderStyle}">
+                <Setter Property="ContentTemplate">
+                    <Setter.Value>
+                        <DataTemplate>
+                            <Grid Loaded="FilterGrid_Loaded" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+                                <Grid.RowDefinitions><RowDefinition Height="40"/><RowDefinition Height="40"/></Grid.RowDefinitions>
+                                <Grid Grid.Row="0" Background="{StaticResource ShrimpPastePurple}" HorizontalAlignment="Stretch">
+                                    <TextBlock Text="{Binding}" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White" Margin="10,0"/>
+                                </Grid>
+                                <AutoSuggestBox Grid.Row="1" Margin="2,4,2,4" PlaceholderText="Search..." Height="32" HorizontalAlignment="Stretch" QueryIcon="Find"
+                                                Text="{Binding Source={StaticResource Proxy}, Path=Data.DeviceImeiFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="DeviceSnHeaderStyle" TargetType="primitives:DataGridColumnHeader" BasedOn="{StaticResource BaseColumnHeaderStyle}">
+                <Setter Property="ContentTemplate">
+                    <Setter.Value>
+                        <DataTemplate>
+                            <Grid Loaded="FilterGrid_Loaded" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+                                <Grid.RowDefinitions><RowDefinition Height="40"/><RowDefinition Height="40"/></Grid.RowDefinitions>
+                                <Grid Grid.Row="0" Background="{StaticResource ShrimpPastePurple}" HorizontalAlignment="Stretch">
+                                    <TextBlock Text="{Binding}" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White" Margin="10,0"/>
+                                </Grid>
+                                <AutoSuggestBox Grid.Row="1" Margin="2,4,2,4" PlaceholderText="Search..." Height="32" HorizontalAlignment="Stretch" QueryIcon="Find"
+                                                Text="{Binding Source={StaticResource Proxy}, Path=Data.DeviceSnFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </Setter.Value>
+                </Setter>
             </Style>
         </Grid.Resources>
         
@@ -39,17 +162,14 @@
             <TabViewItem Header="Model List" IsClosable="False">
                 <Grid Padding="20">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     
                     <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,10" Grid.Row="0">
                         <TextBlock Text="Device Model Management" Style="{StaticResource HeaderTextBlockStyle}"/>
                         <Button Click="Refresh_Click">
                             <StackPanel Orientation="Horizontal" Spacing="5">
-                                <SymbolIcon Symbol="Refresh"/>
-                                <TextBlock Text="Refresh"/>
+                                <SymbolIcon Symbol="Refresh"/><TextBlock Text="Refresh"/>
                             </StackPanel>
                         </Button>
                     </StackPanel>
@@ -64,27 +184,7 @@
                                      Sorting="DataGrid_Sorting"
                                      RowHeight="70">
                         <controls:DataGrid.Columns>
-                            <controls:DataGridTemplateColumn Header="ID" Width="80" Tag="Id">
-                                <controls:DataGridTemplateColumn.HeaderStyle>
-                                    <Style TargetType="primitives:DataGridColumnHeader" BasedOn="{StaticResource BaseColumnHeaderStyle}">
-                                        <Setter Property="ContentTemplate">
-                                            <Setter.Value>
-                                                <DataTemplate>
-                                                    <Grid Loaded="FilterGrid_Loaded" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-                                                        <Grid.RowDefinitions>
-                                                            <RowDefinition Height="40"/>
-                                                            <RowDefinition Height="40"/>
-                                                        </Grid.RowDefinitions>
-                                                        <Grid Grid.Row="0" Background="{StaticResource ShrimpPastePurple}" HorizontalAlignment="Stretch">
-                                                            <TextBlock Text="{Binding}" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White" Margin="10,0"/>
-                                                        </Grid>
-                                                        <Border Grid.Row="1" Height="40" Margin="2,0,2,0"/>
-                                                    </Grid>
-                                                </DataTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </controls:DataGridTemplateColumn.HeaderStyle>
+                            <controls:DataGridTemplateColumn Header="ID" Width="80" Tag="Id" HeaderStyle="{StaticResource NoFilterHeaderStyle}">
                                 <controls:DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate x:DataType="models:Model">
                                         <TextBlock Text="{Binding Id}" VerticalAlignment="Center" Margin="10,0"/>
@@ -92,28 +192,7 @@
                                 </controls:DataGridTemplateColumn.CellTemplate>
                             </controls:DataGridTemplateColumn>
                             
-                            <controls:DataGridTemplateColumn Width="*" Tag="Name" Header="Name">
-                                <controls:DataGridTemplateColumn.HeaderStyle>
-                                    <Style TargetType="primitives:DataGridColumnHeader" BasedOn="{StaticResource BaseColumnHeaderStyle}">
-                                        <Setter Property="ContentTemplate">
-                                            <Setter.Value>
-                                                <DataTemplate>
-                                                    <Grid Loaded="FilterGrid_Loaded" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-                                                        <Grid.RowDefinitions>
-                                                            <RowDefinition Height="40"/>
-                                                            <RowDefinition Height="40"/>
-                                                        </Grid.RowDefinitions>
-                                                        <Grid Grid.Row="0" Background="{StaticResource ShrimpPastePurple}" HorizontalAlignment="Stretch">
-                                                            <TextBlock Text="{Binding}" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White" Margin="10,0"/>
-                                                        </Grid>
-                                                        <AutoSuggestBox Grid.Row="1" Margin="2,4,2,4" PlaceholderText="Filter..." Height="32" HorizontalAlignment="Stretch" QueryIcon="Find"
-                                                                        Text="{Binding Source={StaticResource Proxy}, Path=Data.ModelNameFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                                                    </Grid>
-                                                </DataTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </controls:DataGridTemplateColumn.HeaderStyle>
+                            <controls:DataGridTemplateColumn Width="*" Tag="Name" Header="Name" HeaderStyle="{StaticResource ModelNameHeaderStyle}">
                                 <controls:DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate x:DataType="models:Model">
                                         <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Margin="10,0"/>
@@ -121,28 +200,7 @@
                                 </controls:DataGridTemplateColumn.CellTemplate>
                             </controls:DataGridTemplateColumn>
 
-                            <controls:DataGridTemplateColumn Width="*" Tag="Manufacturer" Header="Manufacturer">
-                                <controls:DataGridTemplateColumn.HeaderStyle>
-                                    <Style TargetType="primitives:DataGridColumnHeader" BasedOn="{StaticResource BaseColumnHeaderStyle}">
-                                        <Setter Property="ContentTemplate">
-                                            <Setter.Value>
-                                                <DataTemplate>
-                                                    <Grid Loaded="FilterGrid_Loaded" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-                                                        <Grid.RowDefinitions>
-                                                            <RowDefinition Height="40"/>
-                                                            <RowDefinition Height="40"/>
-                                                        </Grid.RowDefinitions>
-                                                        <Grid Grid.Row="0" Background="{StaticResource ShrimpPastePurple}" HorizontalAlignment="Stretch">
-                                                            <TextBlock Text="{Binding}" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White" Margin="10,0"/>
-                                                        </Grid>
-                                                        <AutoSuggestBox Grid.Row="1" Margin="2,4,2,4" PlaceholderText="Filter..." Height="32" HorizontalAlignment="Stretch" QueryIcon="Find"
-                                                                        Text="{Binding Source={StaticResource Proxy}, Path=Data.ModelManufacturerFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                                                    </Grid>
-                                                </DataTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </controls:DataGridTemplateColumn.HeaderStyle>
+                            <controls:DataGridTemplateColumn Width="*" Tag="Manufacturer" Header="Manufacturer" HeaderStyle="{StaticResource ModelManufacturerHeaderStyle}">
                                 <controls:DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate x:DataType="models:Model">
                                         <TextBlock Text="{Binding Manufacturer}" VerticalAlignment="Center" Margin="10,0"/>
@@ -150,56 +208,15 @@
                                 </controls:DataGridTemplateColumn.CellTemplate>
                             </controls:DataGridTemplateColumn>
 
-                            <controls:DataGridTemplateColumn Width="*" Tag="Category" Header="Category">
-                                <controls:DataGridTemplateColumn.HeaderStyle>
-                                    <Style TargetType="primitives:DataGridColumnHeader" BasedOn="{StaticResource BaseColumnHeaderStyle}">
-                                        <Setter Property="ContentTemplate">
-                                            <Setter.Value>
-                                                <DataTemplate>
-                                                    <Grid Loaded="FilterGrid_Loaded" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-                                                        <Grid.RowDefinitions>
-                                                            <RowDefinition Height="40"/>
-                                                            <RowDefinition Height="40"/>
-                                                        </Grid.RowDefinitions>
-                                                        <Grid Grid.Row="0" Background="{StaticResource ShrimpPastePurple}" HorizontalAlignment="Stretch">
-                                                            <TextBlock Text="{Binding}" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White" Margin="10,0"/>
-                                                        </Grid>
-                                                        <ComboBox Grid.Row="1" Margin="2,4,2,4" ItemsSource="{Binding Source={StaticResource Proxy}, Path=Data.ModelCategories}"
-                                                                  SelectedItem="{Binding Source={StaticResource Proxy}, Path=Data.ModelCategoryFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                                  HorizontalAlignment="Stretch" Height="32"/>
-                                                    </Grid>
-                                                </DataTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </controls:DataGridTemplateColumn.HeaderStyle>
+                            <controls:DataGridTemplateColumn Header="Category" Width="*" Tag="Category" HeaderStyle="{StaticResource ModelCategoryHeaderStyle}">
                                 <controls:DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate x:DataType="models:Model">
                                         <TextBlock Text="{Binding Category}" VerticalAlignment="Center" Margin="10,0"/>
                                     </DataTemplate>
                                 </controls:DataGridTemplateColumn.CellTemplate>
                             </controls:DataGridTemplateColumn>
-                            <controls:DataGridTemplateColumn Header="Available" Width="*" Tag="Available">
-                                <controls:DataGridTemplateColumn.HeaderStyle>
-                                    <Style TargetType="primitives:DataGridColumnHeader" BasedOn="{StaticResource BaseColumnHeaderStyle}">
-                                        <Setter Property="ContentTemplate">
-                                            <Setter.Value>
-                                                <DataTemplate>
-                                                    <Grid Loaded="FilterGrid_Loaded" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-                                                        <Grid.RowDefinitions>
-                                                            <RowDefinition Height="40"/>
-                                                            <RowDefinition Height="40"/>
-                                                        </Grid.RowDefinitions>
-                                                        <Grid Grid.Row="0" Background="{StaticResource ShrimpPastePurple}" HorizontalAlignment="Stretch">
-                                                            <TextBlock Text="{Binding}" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White" Margin="10,0"/>
-                                                        </Grid>
-                                                        <Border Grid.Row="1" Height="40" Margin="2,0,2,0"/>
-                                                    </Grid>
-                                                </DataTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </controls:DataGridTemplateColumn.HeaderStyle>
+
+                            <controls:DataGridTemplateColumn Header="Available" Width="*" Tag="Available" HeaderStyle="{StaticResource NoFilterHeaderStyle}">
                                 <controls:DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate x:DataType="models:Model">
                                         <TextBlock Text="{Binding Available}" VerticalAlignment="Center" Margin="10,0"/>
@@ -207,67 +224,28 @@
                                 </controls:DataGridTemplateColumn.CellTemplate>
                             </controls:DataGridTemplateColumn>
                             
-                            <controls:DataGridTemplateColumn Header="Function" Width="100">
-                                <controls:DataGridTemplateColumn.HeaderStyle>
-                                    <Style TargetType="primitives:DataGridColumnHeader" BasedOn="{StaticResource BaseColumnHeaderStyle}">
-                                        <Setter Property="ContentTemplate">
-                                            <Setter.Value>
-                                                <DataTemplate>
-                                                    <Grid Loaded="FilterGrid_Loaded" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-                                                        <Grid.RowDefinitions>
-                                                            <RowDefinition Height="40"/>
-                                                            <RowDefinition Height="40"/>
-                                                        </Grid.RowDefinitions>
-                                                        <Grid Grid.Row="0" Background="{StaticResource ShrimpPastePurple}" HorizontalAlignment="Stretch">
-                                                            <TextBlock Text="{Binding}" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White" Margin="10,0"/>
-                                                        </Grid>
-                                                        <Border Grid.Row="1" Height="40" Margin="2,0,2,0"/>
-                                                    </Grid>
-                                                </DataTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </controls:DataGridTemplateColumn.HeaderStyle>
+                            <controls:DataGridTemplateColumn Header="Function" Width="100" HeaderStyle="{StaticResource NoFilterHeaderStyle}">
                                 <controls:DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate x:DataType="models:Model">
-                                        <Button Content="Borrow" 
-                                                IsEnabled="{Binding Available, Converter={StaticResource GreaterThanZero}}"
-                                                Click="Borrow_Click"
-                                                VerticalAlignment="Center"
-                                                HorizontalAlignment="Center"/>
+                                        <Button Content="Borrow" IsEnabled="{Binding Available, Converter={StaticResource GreaterThanZero}}"
+                                                Click="Borrow_Click" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                     </DataTemplate>
                                 </controls:DataGridTemplateColumn.CellTemplate>
                             </controls:DataGridTemplateColumn>
                         </controls:DataGrid.Columns>
                     </controls:DataGrid>
 
-                    <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="20" HorizontalAlignment="Right" Margin="0,10,0,0">
-                        <StackPanel Orientation="Horizontal" Spacing="5">
-                            <TextBlock Text="Total:" VerticalAlignment="Center"/>
-                            <TextBlock Text="{x:Bind ViewModel.ModelTotalCount, Mode=OneWay}" VerticalAlignment="Center"/>
-                        </StackPanel>
-
-                        <StackPanel Orientation="Horizontal" Spacing="5">
-                            <TextBlock Text="Rows per page:" VerticalAlignment="Center"/>
-                            <ComboBox SelectedValue="{x:Bind ViewModel.ModelPageSize, Mode=TwoWay}" Width="80">
-                                <x:Int32>10</x:Int32>
-                                <x:Int32>20</x:Int32>
-                                <x:Int32>30</x:Int32>
-                                <x:Int32>50</x:Int32>
-                            </ComboBox>
-                        </StackPanel>
-
-                        <StackPanel Orientation="Horizontal" Spacing="10">
-                            <Button Content="&lt;&lt;" Click="ModelFirstPage_Click" IsEnabled="{x:Bind ViewModel.CanGoModelPrev, Mode=OneWay}"/>
-                            <Button Content="&lt;" Click="ModelPrevPage_Click" IsEnabled="{x:Bind ViewModel.CanGoModelPrev, Mode=OneWay}"/>
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock Text="{x:Bind ViewModel.ModelCurrentPage, Mode=OneWay}"/>
-                                <TextBlock Text=" / "/>
-                                <TextBlock Text="{x:Bind ViewModel.ModelTotalPages, Mode=OneWay}"/>
-                            </StackPanel>
-                            <Button Content="&gt;" Click="ModelNextPage_Click" IsEnabled="{x:Bind ViewModel.CanGoModelNext, Mode=OneWay}"/>
-                            <Button Content="&gt;&gt;" Click="ModelLastPage_Click" IsEnabled="{x:Bind ViewModel.CanGoModelNext, Mode=OneWay}"/>
-                        </StackPanel>
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0" Spacing="10">
+                        <Button Content="First" Click="ModelFirstPage_Click" IsEnabled="{x:Bind ViewModel.CanGoModelPrev, Mode=OneWay}"/>
+                        <Button Content="Prev" Click="ModelPrevPage_Click" IsEnabled="{x:Bind ViewModel.CanGoModelPrev, Mode=OneWay}"/>
+                        <TextBlock VerticalAlignment="Center">
+                            <Run Text="Page "/>
+                            <Run Text="{x:Bind ViewModel.ModelCurrentPage, Mode=OneWay}"/>
+                            <Run Text=" of "/>
+                            <Run Text="{x:Bind ViewModel.ModelTotalPages, Mode=OneWay}"/>
+                        </TextBlock>
+                        <Button Content="Next" Click="ModelNextPage_Click" IsEnabled="{x:Bind ViewModel.CanGoModelNext, Mode=OneWay}"/>
+                        <Button Content="Last" Click="ModelLastPage_Click" IsEnabled="{x:Bind ViewModel.CanGoModelNext, Mode=OneWay}"/>
                     </StackPanel>
                 </Grid>
             </TabViewItem>
@@ -275,46 +253,32 @@
             <TabViewItem Header="Device List" IsClosable="False">
                 <Grid Padding="20">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
+                    <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,10" Grid.Row="0">
+                        <TextBlock Text="Detailed Devices" Style="{StaticResource HeaderTextBlockStyle}"/>
+                    </StackPanel>
+
                     <controls:DataGrid x:Name="DeviceGrid"
+                                     Grid.Row="1"
                                      AutoGenerateColumns="False"
                                      ItemsSource="{x:Bind ViewModel.Devices, Mode=OneWay}"
                                      HeadersVisibility="All"
                                      ColumnWidth="*"
-                                     LoadingRow="DeviceGrid_LoadingRow"
                                      CanUserSortColumns="True"
                                      Sorting="DataGrid_Sorting"
                                      RowHeight="70">
                         <controls:DataGrid.Columns>
-                            <controls:DataGridTextColumn Binding="{Binding Id}" Header="ID" Width="80" Tag="Id"/>
+                            <controls:DataGridTemplateColumn Header="ID" Width="80" Tag="Id" HeaderStyle="{StaticResource NoFilterHeaderStyle}">
+                                <controls:DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="models:Device">
+                                        <TextBlock Text="{Binding Id}" VerticalAlignment="Center" Margin="10,0"/>
+                                    </DataTemplate>
+                                </controls:DataGridTemplateColumn.CellTemplate>
+                            </controls:DataGridTemplateColumn>
                             
-                            <controls:DataGridTemplateColumn Width="*" Tag="Name" Header="Name">
-                                <controls:DataGridTemplateColumn.HeaderStyle>
-                                    <Style TargetType="primitives:DataGridColumnHeader">
-                                        <Setter Property="Padding" Value="0"/>
-                                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                                        <Setter Property="ContentTemplate">
-                                            <Setter.Value>
-                                                <DataTemplate>
-                                                    <Grid Loaded="FilterGrid_Loaded" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-                                                        <Grid.RowDefinitions>
-                                                            <RowDefinition Height="Auto"/>
-                                                            <RowDefinition Height="Auto"/>
-                                                        </Grid.RowDefinitions>
-                                                        <Grid Grid.Row="0" Background="{ThemeResource SystemControlBackgroundChromeMediumLowBrush}" Padding="8,10" HorizontalAlignment="Stretch">
-                                                            <TextBlock Text="{Binding}" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                                                        </Grid>
-                                                        <AutoSuggestBox Grid.Row="1" Margin="2,2,2,4" PlaceholderText="Search..." Height="32" HorizontalAlignment="Stretch" QueryIcon="Find"
-                                                                        Text="{Binding Source={StaticResource Proxy}, Path=Data.DeviceNameFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                                                    </Grid>
-                                                </DataTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </controls:DataGridTemplateColumn.HeaderStyle>
+                            <controls:DataGridTemplateColumn Width="*" Tag="Name" Header="Name" HeaderStyle="{StaticResource DeviceNameHeaderStyle}">
                                 <controls:DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate x:DataType="models:Device">
                                         <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Margin="10,0"/>
@@ -322,30 +286,7 @@
                                 </controls:DataGridTemplateColumn.CellTemplate>
                             </controls:DataGridTemplateColumn>
 
-                            <controls:DataGridTemplateColumn Width="*" Tag="Imei" Header="IMEI">
-                                <controls:DataGridTemplateColumn.HeaderStyle>
-                                    <Style TargetType="primitives:DataGridColumnHeader">
-                                        <Setter Property="Padding" Value="0"/>
-                                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                                        <Setter Property="ContentTemplate">
-                                            <Setter.Value>
-                                                <DataTemplate>
-                                                    <Grid Loaded="FilterGrid_Loaded" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-                                                        <Grid.RowDefinitions>
-                                                            <RowDefinition Height="Auto"/>
-                                                            <RowDefinition Height="Auto"/>
-                                                        </Grid.RowDefinitions>
-                                                        <Grid Grid.Row="0" Background="{ThemeResource SystemControlBackgroundChromeMediumLowBrush}" Padding="8,10" HorizontalAlignment="Stretch">
-                                                            <TextBlock Text="{Binding}" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                                                        </Grid>
-                                                        <AutoSuggestBox Grid.Row="1" Margin="2,2,2,4" PlaceholderText="Search..." Height="32" HorizontalAlignment="Stretch" QueryIcon="Find"
-                                                                        Text="{Binding Source={StaticResource Proxy}, Path=Data.DeviceImeiFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                                                    </Grid>
-                                                </DataTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </controls:DataGridTemplateColumn.HeaderStyle>
+                            <controls:DataGridTemplateColumn Width="*" Tag="Imei" Header="IMEI" HeaderStyle="{StaticResource DeviceImeiHeaderStyle}">
                                 <controls:DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate x:DataType="models:Device">
                                         <TextBlock Text="{Binding Imei}" VerticalAlignment="Center" Margin="10,0"/>
@@ -353,30 +294,7 @@
                                 </controls:DataGridTemplateColumn.CellTemplate>
                             </controls:DataGridTemplateColumn>
 
-                            <controls:DataGridTemplateColumn Width="*" Tag="SerialNumber" Header="Serial Number">
-                                <controls:DataGridTemplateColumn.HeaderStyle>
-                                    <Style TargetType="primitives:DataGridColumnHeader">
-                                        <Setter Property="Padding" Value="0"/>
-                                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                                        <Setter Property="ContentTemplate">
-                                            <Setter.Value>
-                                                <DataTemplate>
-                                                    <Grid Loaded="FilterGrid_Loaded" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-                                                        <Grid.RowDefinitions>
-                                                            <RowDefinition Height="Auto"/>
-                                                            <RowDefinition Height="Auto"/>
-                                                        </Grid.RowDefinitions>
-                                                        <Grid Grid.Row="0" Background="{ThemeResource SystemControlBackgroundChromeMediumLowBrush}" Padding="8,10" HorizontalAlignment="Stretch">
-                                                            <TextBlock Text="{Binding}" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                                                        </Grid>
-                                                        <AutoSuggestBox Grid.Row="1" Margin="2,2,2,4" PlaceholderText="Search..." Height="32" HorizontalAlignment="Stretch" QueryIcon="Find"
-                                                                        Text="{Binding Source={StaticResource Proxy}, Path=Data.DeviceSnFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                                                    </Grid>
-                                                </DataTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </controls:DataGridTemplateColumn.HeaderStyle>
+                            <controls:DataGridTemplateColumn Width="*" Tag="SerialNumber" Header="Serial Number" HeaderStyle="{StaticResource DeviceSnHeaderStyle}">
                                 <controls:DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate x:DataType="models:Device">
                                         <TextBlock Text="{Binding SerialNumber}" VerticalAlignment="Center" Margin="10,0"/>
@@ -384,27 +302,19 @@
                                 </controls:DataGridTemplateColumn.CellTemplate>
                             </controls:DataGridTemplateColumn>
 
-                             <controls:DataGridCheckBoxColumn Header="Borrowed" Binding="{Binding IsBorrowed}" Width="100" Tag="IsBorrowed"/>
+                             <controls:DataGridCheckBoxColumn Header="Borrowed" Binding="{Binding IsBorrowed}" Width="100" Tag="IsBorrowed" HeaderStyle="{StaticResource NoFilterHeaderStyle}"/>
                             
-                            <controls:DataGridTemplateColumn Header="Function" Width="100">
+                            <controls:DataGridTemplateColumn Header="Function" Width="100" HeaderStyle="{StaticResource NoFilterHeaderStyle}">
                                 <controls:DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate x:DataType="models:Device">
                                         <Button Content="{Binding IsBorrowed, Converter={StaticResource BoolToBorrowReturn}}" 
-                                                Click="ToggleDevice_Click"
-                                                VerticalAlignment="Center"
-                                                HorizontalAlignment="Center"/>
+                                                Click="ToggleDevice_Click" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                     </DataTemplate>
                                 </controls:DataGridTemplateColumn.CellTemplate>
                             </controls:DataGridTemplateColumn>
                         </controls:DataGrid.Columns>
                     </controls:DataGrid>
-
-                    <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="20" HorizontalAlignment="Right" Margin="0,10,0,0">
-                        <StackPanel Orientation="Horizontal" Spacing="5">
-                            <TextBlock Text="Total:" VerticalAlignment="Center"/>
-                            <TextBlock Text="{x:Bind ViewModel.TotalCount, Mode=OneWay}" VerticalAlignment="Center"/>
-                        </StackPanel>
-                        
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0" Spacing="10">
                         <StackPanel Orientation="Horizontal" Spacing="5">
                             <TextBlock Text="Rows per page:" VerticalAlignment="Center"/>
                             <ComboBox SelectedValue="{x:Bind ViewModel.PageSize, Mode=TwoWay}" Width="80">
@@ -416,15 +326,16 @@
                         </StackPanel>
 
                         <StackPanel Orientation="Horizontal" Spacing="10">
-                            <Button Content="&lt;&lt;" Click="FirstPage_Click" IsEnabled="{x:Bind ViewModel.CanGoPrev, Mode=OneWay}"/>
-                            <Button Content="&lt;" Click="PrevPage_Click" IsEnabled="{x:Bind ViewModel.CanGoPrev, Mode=OneWay}"/>
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock Text="{x:Bind ViewModel.CurrentPage, Mode=OneWay}"/>
-                                <TextBlock Text=" / "/>
-                                <TextBlock Text="{x:Bind ViewModel.TotalPages, Mode=OneWay}"/>
-                            </StackPanel>
-                            <Button Content="&gt;" Click="NextPage_Click" IsEnabled="{x:Bind ViewModel.CanGoNext, Mode=OneWay}"/>
-                            <Button Content="&gt;&gt;" Click="LastPage_Click" IsEnabled="{x:Bind ViewModel.CanGoNext, Mode=OneWay}"/>
+                            <Button Content="First" Click="FirstPage_Click" IsEnabled="{x:Bind ViewModel.CanGoPrev, Mode=OneWay}"/>
+                            <Button Content="Prev" Click="PrevPage_Click" IsEnabled="{x:Bind ViewModel.CanGoPrev, Mode=OneWay}"/>
+                            <TextBlock VerticalAlignment="Center">
+                                <Run Text="Page "/>
+                                <Run Text="{x:Bind ViewModel.CurrentPage, Mode=OneWay}"/>
+                                <Run Text=" of "/>
+                                <Run Text="{x:Bind ViewModel.TotalPages, Mode=OneWay}"/>
+                            </TextBlock>
+                            <Button Content="Next" Click="NextPage_Click" IsEnabled="{x:Bind ViewModel.CanGoNext, Mode=OneWay}"/>
+                            <Button Content="Last" Click="LastPage_Click" IsEnabled="{x:Bind ViewModel.CanGoNext, Mode=OneWay}"/>
                         </StackPanel>
                     </StackPanel>
                 </Grid>

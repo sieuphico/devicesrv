@@ -3,6 +3,8 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Media;
 using System;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace DeviceSrv
 {
