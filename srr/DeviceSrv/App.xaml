@@ -9,7 +9,11 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+                <ResourceDictionary Source="Styles/DataGridStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            
+            <!-- Global Proxy for cross-page DataGrid dropdown bindings -->
+            <local:BindingProxy x:Key="GlobalProxy"/>
             
             <local:GreaterThanZeroConverter x:Key="GreaterThanZero"/>
             <local:BoolToColorConverter x:Key="BoolToColor"/>

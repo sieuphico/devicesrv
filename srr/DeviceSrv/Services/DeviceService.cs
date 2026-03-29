@@ -88,6 +88,17 @@ namespace DeviceSrv.Services
             return categories;
         }
 
+        public async Task<IEnumerable<string>> GetDistinctManufacturersAsync()
+        {
+            var sw = Stopwatch.StartNew();
+            using var connection = new NpgsqlConnection(_connectionString);
+            var sql = "SELECT DISTINCT \"Manufacturer\" FROM public.\"Models\" WHERE \"Manufacturer\" IS NOT NULL ORDER BY \"Manufacturer\"";
+            var manufacturers = await connection.QueryAsync<string>(sql);
+            sw.Stop();
+            LogSql(sql, null, sw.ElapsedMilliseconds);
+            return manufacturers;
+        }
+
         public async Task<(IEnumerable<Device> Devices, int TotalCount)> GetDevicesPagedAsync(int pageNumber, int pageSize, string orderBy = "Id", bool isDescending = false, string filter = "")
         {
             var sw = Stopwatch.StartNew();

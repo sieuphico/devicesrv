@@ -19,7 +19,7 @@ namespace DeviceSrv.ViewModels
         public ObservableCollection<Model> Models { get; } = new();
         public ObservableCollection<Device> Devices { get; } = new();
 
-        public ObservableCollection<string> ModelCategories { get; } = new();
+        public Dictionary<string, ObservableCollection<string>> FilterOptions { get; } = new();
 
         // Error Handling
         private string _errorMessage = "";
@@ -59,39 +59,27 @@ namespace DeviceSrv.ViewModels
             _ = LoadDevicesAsync();
         }
 
-        // Model Filters
-        private string _modelNameFilter = "";
-        public string ModelNameFilter { get => _modelNameFilter; set { _modelNameFilter = value; OnPropertyChanged(); _modelCurrentPage = 1; _ = LoadModelsAsync(); } }
-        private string _modelManufacturerFilter = "";
-        public string ModelManufacturerFilter { get => _modelManufacturerFilter; set { _modelManufacturerFilter = value; OnPropertyChanged(); _modelCurrentPage = 1; _ = LoadModelsAsync(); } }
-        
-        private bool _isUpdatingCategories = false;
-        private string _modelCategoryFilter = "All";
-        public string ModelCategoryFilter 
-        { 
-            get => _modelCategoryFilter; 
-            set 
-            { 
-                if (_modelCategoryFilter != value)
-                {
-                    _modelCategoryFilter = value ?? "All"; 
-                    OnPropertyChanged(); 
-                    if (!_isUpdatingCategories) 
-                    {
-                        _modelCurrentPage = 1;
-                        LoadModelsAsync(); 
-                    }
-                }
-            } 
-        }
+        // Text Filters Dictionary
+        public Dictionary<string, string> FilterHeaders { get; } = new();
 
-        // Device Filters
-        private string _deviceNameFilter = "";
-        public string DeviceNameFilter { get => _deviceNameFilter; set { _deviceNameFilter = value; OnPropertyChanged(); _currentPage = 1; _ = LoadDevicesAsync(); } }
-        private string _deviceImeiFilter = "";
-        public string DeviceImeiFilter { get => _deviceImeiFilter; set { _deviceImeiFilter = value; OnPropertyChanged(); _currentPage = 1; _ = LoadDevicesAsync(); } }
-        private string _deviceSnFilter = "";
-        public string DeviceSnFilter { get => _deviceSnFilter; set { _deviceSnFilter = value; OnPropertyChanged(); _currentPage = 1; _ = LoadDevicesAsync(); } }
+        public void UpdateFilter(string filterKey, string text)
+        {
+            FilterHeaders[filterKey] = text;
+
+            if (filterKey.StartsWith("ModelGrid"))
+            {
+                _modelCurrentPage = 1;
+                _ = LoadModelsAsync();
+            }
+            else if (filterKey.StartsWith("DeviceGrid"))
+            {
+                _currentPage = 1;
+                _ = LoadDevicesAsync();
+            }
+        }
+        
+
+
 
         // Model Pagination
         private int _modelPageSize = 10;
@@ -129,6 +117,7 @@ namespace DeviceSrv.ViewModels
             {
                 ErrorMessage = "";
                 await LoadCategoriesAsync();
+                await LoadManufacturersAsync();
                 await LoadModelsAsync();
                 await LoadDevicesAsync();
             }
@@ -146,14 +135,16 @@ namespace DeviceSrv.ViewModels
                 var categoryList = categories.ToList();
                 categoryList.Insert(0, "All");
 
-                _isUpdatingCategories = true;
-                ModelCategories.Clear();
-                foreach (var cat in categoryList) ModelCategories.Add(cat);
+                if (!FilterOptions.ContainsKey("ModelGrid_Category")) FilterOptions["ModelGrid_Category"] = new ObservableCollection<string>();
+                var options = FilterOptions["ModelGrid_Category"];
+
+                options.Clear();
+                foreach (var cat in categoryList) options.Add(cat);
                 
-                if (string.IsNullOrEmpty(ModelCategoryFilter) || !ModelCategories.Contains(ModelCategoryFilter))
-                    ModelCategoryFilter = "All";
-                
-                _isUpdatingCategories = false;
+                if (!FilterHeaders.TryGetValue("ModelGrid_Category", out var currentVal) || !options.Contains(currentVal))
+                {
+                    FilterHeaders["ModelGrid_Category"] = "All";
+                }
             }
             catch (Exception ex)
             {
@@ -161,18 +152,52 @@ namespace DeviceSrv.ViewModels
             }
         }
 
+        public async Task LoadManufacturersAsync()
+        {
+            try
+            {
+                var manufacturers = await _deviceService.GetDistinctManufacturersAsync();
+                var manList = manufacturers.ToList();
+                manList.Insert(0, "All");
+
+                if (!FilterOptions.ContainsKey("ModelGrid_Manufacturer")) FilterOptions["ModelGrid_Manufacturer"] = new ObservableCollection<string>();
+                var options = FilterOptions["ModelGrid_Manufacturer"];
+
+                options.Clear();
+                foreach (var man in manList) options.Add(man);
+                
+                if (!FilterHeaders.TryGetValue("ModelGrid_Manufacturer", out var currentVal) || !options.Contains(currentVal))
+                {
+                    FilterHeaders["ModelGrid_Manufacturer"] = "All";
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error loading manufacturers: {ex.Message}");
+            }
+        }
+
         public async Task LoadModelsAsync()
         {
             try
             {
+                string nameFilter = FilterHeaders.TryGetValue("ModelGrid_Name", out var n) ? n : "";
+                
+                // GetModelsPagedAsync expects categoryFilter="All", manufacturerFilter="" logic
+                string manufacturerFilterRaw = FilterHeaders.TryGetValue("ModelGrid_Manufacturer", out var manf) ? manf : "";
+                string manufacturerFilter = manufacturerFilterRaw == "All" ? "" : manufacturerFilterRaw;
+                
+                string categoryFilterRaw = FilterHeaders.TryGetValue("ModelGrid_Category", out var cat) ? cat : "All";
+                string categoryFilter = string.IsNullOrEmpty(categoryFilterRaw) ? "All" : categoryFilterRaw;
+
                 var (models, total) = await _deviceService.GetModelsPagedAsync(
                     ModelCurrentPage, 
                     ModelPageSize, 
                     ModelOrderBy, 
                     ModelIsDescending, 
-                    ModelNameFilter, 
-                    ModelManufacturerFilter, 
-                    ModelCategoryFilter);
+                    nameFilter, 
+                    manufacturerFilter, 
+                    categoryFilter);
                 
                 Models.Clear();
                 foreach (var m in models) Models.Add(m);
@@ -189,7 +214,11 @@ namespace DeviceSrv.ViewModels
         {
             try
             {
-                var combinedFilter = $"{DeviceNameFilter} {DeviceImeiFilter} {DeviceSnFilter}".Trim();
+                string dName = FilterHeaders.TryGetValue("DeviceGrid_Name", out var dn) ? dn : "";
+                string dImei = FilterHeaders.TryGetValue("DeviceGrid_Imei", out var di) ? di : "";
+                string dSn = FilterHeaders.TryGetValue("DeviceGrid_SerialNumber", out var ds) ? ds : "";
+
+                var combinedFilter = $"{dName} {dImei} {dSn}".Trim();
                 var (devices, total) = await _deviceService.GetDevicesPagedAsync(CurrentPage, PageSize, DeviceOrderBy, DeviceIsDescending, combinedFilter);
                 
                 Devices.Clear();
