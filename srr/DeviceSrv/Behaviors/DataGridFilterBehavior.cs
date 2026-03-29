@@ -99,11 +99,7 @@ namespace DeviceSrv.Behaviors
                 if (grid != null && !string.IsNullOrEmpty(tag))
                 {
                     var filterKey = $"{grid.Name}_{tag}";
-                    if (grid.DataContext is MainWindow window) 
-                    { 
-                        window.ViewModel.UpdateFilter(filterKey, sender.Text); 
-                    }
-                    else if (grid.DataContext is MainViewModel vm)
+                    if (grid.DataContext is FilterableViewModel vm)
                     {
                         vm.UpdateFilter(filterKey, sender.Text);
                     }
@@ -147,12 +143,7 @@ namespace DeviceSrv.Behaviors
                 if (grid != null && !string.IsNullOrEmpty(tag))
                 {
                     var filterKey = $"{grid.Name}_{tag}";
-                    MainViewModel? vm = null;
-
-                    if (grid.DataContext is MainWindow window) vm = window.ViewModel;
-                    else if (grid.DataContext is MainViewModel mainVm) vm = mainVm;
-
-                    if (vm != null)
+                    if (grid.DataContext is FilterableViewModel vm)
                     {
                         if (!vm.FilterOptions.TryGetValue(filterKey, out var options))
                         {
@@ -184,11 +175,7 @@ namespace DeviceSrv.Behaviors
                     var filterKey = $"{grid.Name}_{tag}";
                     var selectedVal = box.SelectedItem?.ToString() ?? "All";
                     
-                    if (grid.DataContext is MainWindow window) 
-                    { 
-                        window.ViewModel.UpdateFilter(filterKey, selectedVal); 
-                    }
-                    else if (grid.DataContext is MainViewModel vm)
+                    if (grid.DataContext is FilterableViewModel vm)
                     {
                         vm.UpdateFilter(filterKey, selectedVal);
                     }

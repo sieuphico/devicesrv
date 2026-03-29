@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:DeviceSrv"
     xmlns:vm="using:DeviceSrv.ViewModels"
+    xmlns:views="using:DeviceSrv.Views"
     xmlns:models="using:DeviceSrv.Models"
     xmlns:controls="using:CommunityToolkit.WinUI.UI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -13,7 +14,6 @@
 
     <Grid x:Name="RootGrid">
 
-        
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -22,174 +22,18 @@
         <InfoBar x:Name="ErrorBar"
                  Severity="Error"
                  Title="System Information"
-                 Message="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}"
-                 IsOpen="{x:Bind ViewModel.HasError, Mode=OneWay}"
+                 Message="{x:Bind ViewModel.ModelVM.ErrorMessage, Mode=OneWay}"
+                 IsOpen="{x:Bind ViewModel.ModelVM.HasError, Mode=OneWay}"
                  HorizontalAlignment="Stretch"
                  Grid.Row="0"/>
 
         <TabView x:Name="MainTabView" Grid.Row="1">
             <TabViewItem Header="Model List" IsClosable="False">
-                <Grid Padding="20">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    
-                    <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,10" Grid.Row="0">
-                        <TextBlock Text="Device Model Management" Style="{StaticResource HeaderTextBlockStyle}"/>
-                        <Button Click="Refresh_Click">
-                            <StackPanel Orientation="Horizontal" Spacing="5">
-                                <SymbolIcon Symbol="Refresh"/><TextBlock Text="Refresh"/>
-                            </StackPanel>
-                        </Button>
-                    </StackPanel>
-
-                    <controls:DataGrid x:Name="ModelGrid"
-                                     Grid.Row="1"
-                                     AutoGenerateColumns="False"
-                                     ItemsSource="{x:Bind ViewModel.Models, Mode=OneWay}"
-                                     HeadersVisibility="All"
-                                     ColumnWidth="*"
-                                     CanUserSortColumns="True"
-                                     Sorting="DataGrid_Sorting"
-                                     RowHeight="70">
-                        <controls:DataGrid.Columns>
-                            <controls:DataGridTextColumn Header="ID" Width="80" Tag="Id" 
-                                                         Binding="{Binding Id}"
-                                                         IsReadOnly="True"
-                                                         HeaderStyle="{StaticResource NoFilterHeaderStyle}"
-                                                         ElementStyle="{StaticResource DefaultCellTextStyle}"/>
-                            
-                            <controls:DataGridTextColumn Width="*" Tag="Name" Header="Name" 
-                                                         Binding="{Binding Name}"
-                                                         IsReadOnly="True"
-                                                         HeaderStyle="{StaticResource AutoSuggestHeaderStyle}"
-                                                         ElementStyle="{StaticResource DefaultCellTextStyle}"/>
-
-                            <controls:DataGridTextColumn Width="*" Tag="Manufacturer" Header="Manufacturer" 
-                                                         Binding="{Binding Manufacturer}"
-                                                         IsReadOnly="True"
-                                                         HeaderStyle="{StaticResource ComboBoxFilterHeaderStyle}"
-                                                         ElementStyle="{StaticResource DefaultCellTextStyle}"/>
-
-                            <controls:DataGridTextColumn Header="Category" Width="*" Tag="Category" 
-                                                         Binding="{Binding Category}"
-                                                         IsReadOnly="True"
-                                                         HeaderStyle="{StaticResource ComboBoxFilterHeaderStyle}"
-                                                         ElementStyle="{StaticResource DefaultCellTextStyle}"/>
-
-                            <controls:DataGridTextColumn Header="Available" Width="*" Tag="Available" 
-                                                         Binding="{Binding Available}"
-                                                         IsReadOnly="True"
-                                                         HeaderStyle="{StaticResource NoFilterHeaderStyle}"
-                                                         ElementStyle="{StaticResource DefaultCellTextStyle}"/>
-                            
-                            <controls:DataGridTemplateColumn Header="Function" Width="100" HeaderStyle="{StaticResource NoFilterHeaderStyle}">
-                                <controls:DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate x:DataType="models:Model">
-                                        <Button Content="Borrow" IsEnabled="{Binding Available, Converter={StaticResource GreaterThanZero}}"
-                                                Click="Borrow_Click" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                                    </DataTemplate>
-                                </controls:DataGridTemplateColumn.CellTemplate>
-                            </controls:DataGridTemplateColumn>
-                        </controls:DataGrid.Columns>
-                    </controls:DataGrid>
-
-                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0" Spacing="10">
-                        <Button Content="First" Click="ModelFirstPage_Click" IsEnabled="{x:Bind ViewModel.CanGoModelPrev, Mode=OneWay}"/>
-                        <Button Content="Prev" Click="ModelPrevPage_Click" IsEnabled="{x:Bind ViewModel.CanGoModelPrev, Mode=OneWay}"/>
-                        <TextBlock VerticalAlignment="Center">
-                            <Run Text="Page "/>
-                            <Run Text="{x:Bind ViewModel.ModelCurrentPage, Mode=OneWay}"/>
-                            <Run Text=" of "/>
-                            <Run Text="{x:Bind ViewModel.ModelTotalPages, Mode=OneWay}"/>
-                        </TextBlock>
-                        <Button Content="Next" Click="ModelNextPage_Click" IsEnabled="{x:Bind ViewModel.CanGoModelNext, Mode=OneWay}"/>
-                        <Button Content="Last" Click="ModelLastPage_Click" IsEnabled="{x:Bind ViewModel.CanGoModelNext, Mode=OneWay}"/>
-                    </StackPanel>
-                </Grid>
+                <views:ModelListView DataContext="{x:Bind ViewModel.ModelVM}" />
             </TabViewItem>
 
             <TabViewItem Header="Device List" IsClosable="False">
-                <Grid Padding="20">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-
-                    <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,10" Grid.Row="0">
-                        <TextBlock Text="Detailed Devices" Style="{StaticResource HeaderTextBlockStyle}"/>
-                    </StackPanel>
-
-                    <controls:DataGrid x:Name="DeviceGrid"
-                                     Grid.Row="1"
-                                     AutoGenerateColumns="False"
-                                     ItemsSource="{x:Bind ViewModel.Devices, Mode=OneWay}"
-                                     HeadersVisibility="All"
-                                     ColumnWidth="*"
-                                     CanUserSortColumns="True"
-                                     Sorting="DataGrid_Sorting"
-                                     RowHeight="70">
-                        <controls:DataGrid.Columns>
-                            <controls:DataGridTextColumn Header="ID" Width="80" Tag="Id" 
-                                                         Binding="{Binding Id}"
-                                                         IsReadOnly="True"
-                                                         HeaderStyle="{StaticResource NoFilterHeaderStyle}"
-                                                         ElementStyle="{StaticResource DefaultCellTextStyle}"/>
-                            
-                            <controls:DataGridTextColumn Width="*" Tag="Name" Header="Name" 
-                                                         Binding="{Binding Name}"
-                                                         IsReadOnly="True"
-                                                         HeaderStyle="{StaticResource AutoSuggestHeaderStyle}"
-                                                         ElementStyle="{StaticResource DefaultCellTextStyle}"/>
-
-                            <controls:DataGridTextColumn Width="*" Tag="Imei" Header="IMEI" 
-                                                         Binding="{Binding Imei}"
-                                                         IsReadOnly="True"
-                                                         HeaderStyle="{StaticResource AutoSuggestHeaderStyle}"
-                                                         ElementStyle="{StaticResource DefaultCellTextStyle}"/>
-
-                            <controls:DataGridTextColumn Width="*" Tag="SerialNumber" Header="Serial Number" 
-                                                         Binding="{Binding SerialNumber}"
-                                                         IsReadOnly="True"
-                                                         HeaderStyle="{StaticResource AutoSuggestHeaderStyle}"
-                                                         ElementStyle="{StaticResource DefaultCellTextStyle}"/>
-
-                             <controls:DataGridCheckBoxColumn Header="Borrowed" Binding="{Binding IsBorrowed}" Width="100" Tag="IsBorrowed" HeaderStyle="{StaticResource NoFilterHeaderStyle}"/>
-                            
-                            <controls:DataGridTemplateColumn Header="Function" Width="100" HeaderStyle="{StaticResource NoFilterHeaderStyle}">
-                                <controls:DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate x:DataType="models:Device">
-                                        <Button Content="{Binding IsBorrowed, Converter={StaticResource BoolToBorrowReturn}}" 
-                                                Click="ToggleDevice_Click" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                                    </DataTemplate>
-                                </controls:DataGridTemplateColumn.CellTemplate>
-                            </controls:DataGridTemplateColumn>
-                        </controls:DataGrid.Columns>
-                    </controls:DataGrid>
-                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0" Spacing="10">
-                        <StackPanel Orientation="Horizontal" Spacing="5">
-                            <TextBlock Text="Rows per page:" VerticalAlignment="Center"/>
-                            <ComboBox SelectedValue="{x:Bind ViewModel.PageSize, Mode=TwoWay}" Width="80">
-                                <x:Int32>10</x:Int32>
-                                <x:Int32>20</x:Int32>
-                                <x:Int32>30</x:Int32>
-                                <x:Int32>50</x:Int32>
-                            </ComboBox>
-                        </StackPanel>
-
-                        <StackPanel Orientation="Horizontal" Spacing="10">
-                            <Button Content="First" Click="FirstPage_Click" IsEnabled="{x:Bind ViewModel.CanGoPrev, Mode=OneWay}"/>
-                            <Button Content="Prev" Click="PrevPage_Click" IsEnabled="{x:Bind ViewModel.CanGoPrev, Mode=OneWay}"/>
-                            <TextBlock VerticalAlignment="Center">
-                                <Run Text="Page "/>
-                                <Run Text="{x:Bind ViewModel.CurrentPage, Mode=OneWay}"/>
-                                <Run Text=" of "/>
-                                <Run Text="{x:Bind ViewModel.TotalPages, Mode=OneWay}"/>
-                            </TextBlock>
-                            <Button Content="Next" Click="NextPage_Click" IsEnabled="{x:Bind ViewModel.CanGoNext, Mode=OneWay}"/>
-                            <Button Content="Last" Click="LastPage_Click" IsEnabled="{x:Bind ViewModel.CanGoNext, Mode=OneWay}"/>
-                        </StackPanel>
-                    </StackPanel>
-                </Grid>
+                <views:DeviceListView DataContext="{x:Bind ViewModel.DeviceVM}" />
             </TabViewItem>
         </TabView>
     </Grid>
