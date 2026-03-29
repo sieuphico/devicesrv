@@ -60,6 +60,8 @@ namespace DeviceSrv.Behaviors
                         sortIcon.VerticalAlignment = VerticalAlignment.Top;
                         sortIcon.HorizontalAlignment = HorizontalAlignment.Right;
                         sortIcon.Margin = new Thickness(0, 12, 12, 0); 
+                        sortIcon.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.White);
+                        Canvas.SetZIndex(sortIcon, 999); 
                     }
                 }
             }
