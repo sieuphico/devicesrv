@@ -6,7 +6,7 @@
     xmlns:behaviors="using:DeviceSrv.Behaviors"
     xmlns:primitives="using:CommunityToolkit.WinUI.UI.Controls.Primitives">
 
-    <SolidColorBrush x:Key="ShrimpPastePurple" Color="#5D3F6A"/>
+    <SolidColorBrush x:Key="HeaderBackgroundBrush" Color="LightGray"/>
 
     <Style x:Key="BaseColumnHeaderStyle" TargetType="primitives:DataGridColumnHeader">
         <Setter Property="Padding" Value="0"/>
@@ -26,8 +26,9 @@
                 <DataTemplate>
                     <Grid behaviors:DataGridFilterBehavior.IsFilterHeader="True" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
                         <Grid.RowDefinitions><RowDefinition Height="40"/><RowDefinition Height="40"/></Grid.RowDefinitions>
-                        <Grid Grid.Row="0" Background="{StaticResource ShrimpPastePurple}" HorizontalAlignment="Stretch">
-                            <TextBlock Text="{Binding}" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White" Margin="10,0"/>
+                        <Grid Grid.Row="0" Background="{StaticResource HeaderBackgroundBrush}" HorizontalAlignment="Stretch">
+                            <TextBlock Text="{Binding}" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="Black" Margin="10,0,30,0"/>
+                            <FontIcon behaviors:DataGridFilterBehavior.IsCustomSortIcon="True" FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="12" Foreground="Black" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0" Glyph="&#xE8CB;" />
                         </Grid>
                         <Border Grid.Row="1" Height="40" Margin="2,0,2,0"/>
                     </Grid>
@@ -43,8 +44,9 @@
                 <DataTemplate>
                     <Grid behaviors:DataGridFilterBehavior.IsFilterHeader="True" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
                         <Grid.RowDefinitions><RowDefinition Height="40"/><RowDefinition Height="40"/></Grid.RowDefinitions>
-                        <Grid Grid.Row="0" Background="{StaticResource ShrimpPastePurple}" HorizontalAlignment="Stretch">
-                            <TextBlock Text="{Binding}" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White" Margin="10,0"/>
+                        <Grid Grid.Row="0" Background="{StaticResource HeaderBackgroundBrush}" HorizontalAlignment="Stretch">
+                            <TextBlock Text="{Binding}" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="Black" Margin="10,0,30,0"/>
+                            <FontIcon behaviors:DataGridFilterBehavior.IsCustomSortIcon="True" FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="12" Foreground="Black" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0" Glyph="&#xE8CB;" />
                         </Grid>
                         <AutoSuggestBox Grid.Row="1" Margin="2,4,2,4" PlaceholderText="Filter..." Height="32" HorizontalAlignment="Stretch" QueryIcon="Find"
                                         behaviors:DataGridFilterBehavior.EnableAutoFilter="True"/>
@@ -61,8 +63,9 @@
                 <DataTemplate>
                     <Grid behaviors:DataGridFilterBehavior.IsFilterHeader="True" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
                         <Grid.RowDefinitions><RowDefinition Height="40"/><RowDefinition Height="40"/></Grid.RowDefinitions>
-                        <Grid Grid.Row="0" Background="{StaticResource ShrimpPastePurple}" HorizontalAlignment="Stretch">
-                            <TextBlock Text="{Binding}" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="White" Margin="10,0"/>
+                        <Grid Grid.Row="0" Background="{StaticResource HeaderBackgroundBrush}" HorizontalAlignment="Stretch">
+                            <TextBlock Text="{Binding}" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="Black" Margin="10,0,30,0"/>
+                            <FontIcon behaviors:DataGridFilterBehavior.IsCustomSortIcon="True" FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="12" Foreground="Black" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0" Glyph="&#xE8CB;" />
                         </Grid>
                         <ComboBox Grid.Row="1" Margin="2,4,2,4" behaviors:DataGridFilterBehavior.EnableComboBoxFilter="True"
                                   HorizontalAlignment="Stretch" Height="32"/>

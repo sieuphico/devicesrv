@@ -54,14 +54,11 @@ namespace DeviceSrv.Behaviors
                         presenter.HorizontalContentAlignment = HorizontalAlignment.Stretch;
                     }
 
+                    // Hiding the native SortIcon to allow our custom one to shine
                     var sortIcon = FindVisualChildByName<FontIcon>(header, "SortIcon");
                     if (sortIcon != null)
                     {
-                        sortIcon.VerticalAlignment = VerticalAlignment.Top;
-                        sortIcon.HorizontalAlignment = HorizontalAlignment.Right;
-                        sortIcon.Margin = new Thickness(0, 12, 12, 0); 
-                        sortIcon.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.White);
-                        Canvas.SetZIndex(sortIcon, 999); 
+                        sortIcon.Visibility = Visibility.Collapsed;
                     }
                 }
             }
@@ -183,6 +180,128 @@ namespace DeviceSrv.Behaviors
                     }
                 }
             }
+        }
+
+        // -------------------------------------------------------------------------
+        // IsCustomSortIcon Property: Attached to FontIcon to customize sorting icon
+        // -------------------------------------------------------------------------
+        public static readonly DependencyProperty IsCustomSortIconProperty =
+            DependencyProperty.RegisterAttached(
+                "IsCustomSortIcon", typeof(bool), typeof(DataGridFilterBehavior),
+                new PropertyMetadata(false, OnIsCustomSortIconChanged));
+
+        public static bool GetIsCustomSortIcon(DependencyObject obj) => (bool)obj.GetValue(IsCustomSortIconProperty);
+        public static void SetIsCustomSortIcon(DependencyObject obj, bool value) => obj.SetValue(IsCustomSortIconProperty, value);
+
+        private static void OnIsCustomSortIconChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is FontIcon icon && (bool)e.NewValue)
+            {
+                icon.Loaded += CustomSortIcon_Loaded;
+                icon.Unloaded += CustomSortIcon_Unloaded;
+            }
+        }
+
+        private static void CustomSortIcon_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (sender is FontIcon icon)
+            {
+                var (grid, col) = GetGridAndColumn(icon);
+                if (grid != null && col != null)
+                {
+                    UpdateCustomSortIcon(icon, col.SortDirection);
+
+                    // Attach to DataGrid.Sorting to update ALL icons when sorting happens
+                    grid.Sorting -= Grid_SortingForIcons; // Prevent duplicate hooks
+                    grid.Sorting += Grid_SortingForIcons;
+                }
+            }
+        }
+
+        private static void CustomSortIcon_Unloaded(object sender, RoutedEventArgs e)
+        {
+            if (sender is FontIcon icon)
+            {
+                var (grid, _) = GetGridAndColumn(icon);
+                if (grid != null) grid.Sorting -= Grid_SortingForIcons;
+            }
+        }
+
+        private static void Grid_SortingForIcons(object? sender, CommunityToolkit.WinUI.UI.Controls.DataGridColumnEventArgs e)
+        {
+            if (sender is CommunityToolkit.WinUI.UI.Controls.DataGrid grid)
+            {
+                // Defer changing glyphs until after DataGrid updates the SortDirections in ViewModel/CodeBehind
+                grid.DispatcherQueue.TryEnqueue(() =>
+                {
+                    var headersPresenter = FindVisualChildByType<DataGridColumnHeadersPresenter>(grid);
+                    if (headersPresenter != null)
+                    {
+                        for (int i = 0; i < Microsoft.UI.Xaml.Media.VisualTreeHelper.GetChildrenCount(headersPresenter); i++)
+                        {
+                            var header = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetChild(headersPresenter, i);
+                            var icon = FindCustomSortIcon(header);
+                            if (icon != null)
+                            {
+                                var (_, col) = GetGridAndColumn(icon);
+                                if (col != null) UpdateCustomSortIcon(icon, col.SortDirection);
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        private static FontIcon? FindCustomSortIcon(DependencyObject parent)
+        {
+            for (int i = 0; i < Microsoft.UI.Xaml.Media.VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetChild(parent, i);
+                if (child is FontIcon icon && GetIsCustomSortIcon(icon)) return icon;
+                var result = FindCustomSortIcon(child);
+                if (result != null) return result;
+            }
+            return null;
+        }
+
+        private static void UpdateCustomSortIcon(FontIcon icon, CommunityToolkit.WinUI.UI.Controls.DataGridSortDirection? direction)
+        {
+            if (direction == null)
+            {
+                icon.Glyph = "\uE8CB"; // Biểu tượng Sort 2 chiều (Mũi tên lên/xuống chung)
+            }
+            else if (direction == CommunityToolkit.WinUI.UI.Controls.DataGridSortDirection.Ascending)
+            {
+                icon.Glyph = "\uE70E"; // Chevron Up (Biểu tượng chiều tăng ^)
+            }
+            else
+            {
+                icon.Glyph = "\uE70D"; // Chevron Down (Biểu tượng chiều giảm v)
+            }
+        }
+
+        private static (CommunityToolkit.WinUI.UI.Controls.DataGrid? grid, CommunityToolkit.WinUI.UI.Controls.DataGridColumn? col) GetGridAndColumn(DependencyObject element)
+        {
+            var parent = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetParent(element);
+            while (parent != null && !(parent is DataGridColumnHeader))
+            {
+                parent = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetParent(parent);
+            }
+            if (parent is DataGridColumnHeader header)
+            {
+                var gridParent = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetParent(header);
+                while (gridParent != null && !(gridParent is CommunityToolkit.WinUI.UI.Controls.DataGrid))
+                {
+                    gridParent = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetParent(gridParent);
+                }
+                if (gridParent is CommunityToolkit.WinUI.UI.Controls.DataGrid grid)
+                {
+                    var headerContent = header.Content?.ToString();
+                    var column = Enumerable.FirstOrDefault(grid.Columns, c => c.Header?.ToString() == headerContent);
+                    return (grid, column);
+                }
+            }
+            return (null, null);
         }
 
         // Helper to find Grid and Tag
