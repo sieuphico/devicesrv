@@ -108,7 +108,7 @@ namespace DeviceSrv.ViewModels
                 string dSn = FilterHeaders.TryGetValue("DeviceGrid_SerialNumber", out var ds) ? ds : "";
 
                 var combinedFilter = $"{dName} {dImei} {dSn}".Trim();
-                var (devices, total) = await _deviceService.GetDevicesPagedAsync(CurrentPage, PageSize, DeviceOrderBy, DeviceIsDescending, combinedFilter);
+                var (devices, total) = await _deviceService.GetDevicesPagedAsync(CurrentPage, PageSize, DeviceOrderBy, DeviceIsDescending, combinedFilter, onlyBorrowed: true);
                 
                 Devices.Clear();
                 foreach (var d in devices) Devices.Add(d);
@@ -134,6 +134,12 @@ namespace DeviceSrv.ViewModels
                     device.IsBorrowed = !oldStatus;
                     DeviceToggled?.Invoke(modelId, device.IsBorrowed);
                     ErrorMessage = "";
+
+                    // If device was returned (now available), refresh list so it disappears
+                    if (!device.IsBorrowed)
+                    {
+                        _ = LoadDevicesAsync();
+                    }
                 }
             }
             catch (Exception ex)

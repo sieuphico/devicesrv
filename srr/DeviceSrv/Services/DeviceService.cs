@@ -99,7 +99,7 @@ namespace DeviceSrv.Services
             return manufacturers;
         }
 
-        public async Task<(IEnumerable<Device> Devices, int TotalCount)> GetDevicesPagedAsync(int pageNumber, int pageSize, string orderBy = "Id", bool isDescending = false, string filter = "")
+        public async Task<(IEnumerable<Device> Devices, int TotalCount)> GetDevicesPagedAsync(int pageNumber, int pageSize, string orderBy = "Id", bool isDescending = false, string filter = "", bool? onlyBorrowed = null)
         {
             var sw = Stopwatch.StartNew();
             using var connection = new NpgsqlConnection(_connectionString);
@@ -109,14 +109,22 @@ namespace DeviceSrv.Services
             if (!validColumns.Contains(orderBy)) orderBy = "Id";
             var sortDir = isDescending ? "DESC" : "ASC";
 
-            var whereSql = "";
+            var whereClauses = new List<string>();
             var parameters = new DynamicParameters();
+
+            if (onlyBorrowed.HasValue)
+            {
+                whereClauses.Add("\"IsBorrowed\" = @OnlyBorrowed");
+                parameters.Add("OnlyBorrowed", onlyBorrowed.Value);
+            }
+
             if (!string.IsNullOrEmpty(filter))
             {
-                // Optimization: Use separate parameters or trgm optimized query if available
-                whereSql = "WHERE \"Name\" ILIKE @Filter OR \"Imei\" ILIKE @Filter OR \"SerialNumber\" ILIKE @Filter";
+                whereClauses.Add("(\"Name\" ILIKE @Filter OR \"Imei\" ILIKE @Filter OR \"SerialNumber\" ILIKE @Filter)");
                 parameters.Add("Filter", $"%{filter}%");
             }
+            
+            var whereSql = whereClauses.Any() ? "WHERE " + string.Join(" AND ", whereClauses) : "";
             
             var sql = $"SELECT * FROM public.\"Devices\" {whereSql} ORDER BY \"{orderBy}\" {sortDir} LIMIT @PageSize OFFSET @Offset";
             var countSql = $"SELECT COUNT(*) FROM public.\"Devices\" {whereSql}";
@@ -128,7 +136,7 @@ namespace DeviceSrv.Services
             var totalCount = await connection.ExecuteScalarAsync<int>(countSql, parameters);
             
             sw.Stop();
-            LogSql(sql, new { filter, pageSize, offset }, sw.ElapsedMilliseconds);
+            LogSql(sql, new { filter, onlyBorrowed, pageSize, offset }, sw.ElapsedMilliseconds);
             
             return (devices, totalCount);
         }
