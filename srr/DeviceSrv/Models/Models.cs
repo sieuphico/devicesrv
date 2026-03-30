@@ -30,6 +30,7 @@ namespace DeviceSrv.Models
         public int Id { get; set; }
         public int ModelId { get; set; }
         public string Name { get; set; }
+        public string ModelName { get; set; }
         public string Imei { get; set; }
         public string SerialLab { get; set; }
         public string SerialNumber { get; set; }

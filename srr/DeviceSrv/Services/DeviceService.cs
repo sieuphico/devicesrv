@@ -105,7 +105,7 @@ namespace DeviceSrv.Services
             using var connection = new NpgsqlConnection(_connectionString);
             var offset = (pageNumber - 1) * pageSize;
             
-            var validColumns = new[] { "Id", "Name", "Imei", "SerialNumber", "IsBorrowed" };
+            var validColumns = new[] { "Id", "Name", "Imei", "SerialNumber", "IsBorrowed", "ModelName" };
             if (!validColumns.Contains(orderBy)) orderBy = "Id";
             var sortDir = isDescending ? "DESC" : "ASC";
 
@@ -114,20 +114,28 @@ namespace DeviceSrv.Services
 
             if (onlyBorrowed.HasValue)
             {
-                whereClauses.Add("\"IsBorrowed\" = @OnlyBorrowed");
+                whereClauses.Add("d.\"IsBorrowed\" = @OnlyBorrowed");
                 parameters.Add("OnlyBorrowed", onlyBorrowed.Value);
             }
 
             if (!string.IsNullOrEmpty(filter))
             {
-                whereClauses.Add("(\"Name\" ILIKE @Filter OR \"Imei\" ILIKE @Filter OR \"SerialNumber\" ILIKE @Filter)");
+                whereClauses.Add("(d.\"Name\" ILIKE @Filter OR d.\"Imei\" ILIKE @Filter OR d.\"SerialNumber\" ILIKE @Filter OR m.\"Name\" ILIKE @Filter)");
                 parameters.Add("Filter", $"%{filter}%");
             }
             
             var whereSql = whereClauses.Any() ? "WHERE " + string.Join(" AND ", whereClauses) : "";
             
-            var sql = $"SELECT * FROM public.\"Devices\" {whereSql} ORDER BY \"{orderBy}\" {sortDir} LIMIT @PageSize OFFSET @Offset";
-            var countSql = $"SELECT COUNT(*) FROM public.\"Devices\" {whereSql}";
+            var sortColumn = orderBy == "ModelName" ? "m.\"Name\"" : $"d.\"{orderBy}\"";
+            var sql = $@"
+                SELECT d.*, m.""Name"" AS ""ModelName"" 
+                FROM public.""Devices"" d 
+                JOIN public.""Models"" m ON d.""ModelId"" = m.""Id"" 
+                {whereSql} 
+                ORDER BY {sortColumn} {sortDir} 
+                LIMIT @PageSize OFFSET @Offset";
+            
+            var countSql = $"SELECT COUNT(*) FROM public.\"Devices\" d JOIN public.\"Models\" m ON d.\"ModelId\" = m.\"Id\" {whereSql}";
             
             parameters.Add("PageSize", pageSize);
             parameters.Add("Offset", offset);

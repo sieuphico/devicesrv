@@ -43,6 +43,12 @@
                                              HeaderStyle="{StaticResource AutoSuggestHeaderStyle}"
                                              ElementStyle="{StaticResource DefaultCellTextStyle}"/>
 
+                <controls:DataGridTextColumn Width="*" Tag="ModelName" Header="Model Name" 
+                                             Binding="{Binding ModelName}"
+                                             IsReadOnly="True"
+                                             HeaderStyle="{StaticResource AutoSuggestHeaderStyle}"
+                                             ElementStyle="{StaticResource DefaultCellTextStyle}"/>
+
                 <controls:DataGridTextColumn Width="*" Tag="Imei" Header="IMEI" 
                                              Binding="{Binding Imei}"
                                              IsReadOnly="True"
@@ -57,7 +63,7 @@
 
                  <controls:DataGridCheckBoxColumn Header="Borrowed" Binding="{Binding IsBorrowed}" Width="100" Tag="IsBorrowed" HeaderStyle="{StaticResource NoFilterHeaderStyle}"/>
                 
-                <controls:DataGridTemplateColumn Header="Function" Width="100" HeaderStyle="{StaticResource NoFilterHeaderStyle}">
+                <controls:DataGridTemplateColumn Header="Function" Width="100" HeaderStyle="{StaticResource ClearFilterHeaderStyle}">
                     <controls:DataGridTemplateColumn.CellTemplate>
                         <DataTemplate x:DataType="models:Device">
                             <Button Content="{Binding IsBorrowed, Converter={StaticResource BoolToBorrowReturn}}" 

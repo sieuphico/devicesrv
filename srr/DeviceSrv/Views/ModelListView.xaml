@@ -65,7 +65,7 @@
                                              HeaderStyle="{StaticResource NoFilterHeaderStyle}"
                                              ElementStyle="{StaticResource DefaultCellTextStyle}"/>
                 
-                <controls:DataGridTemplateColumn Header="Function" Width="100" HeaderStyle="{StaticResource NoFilterHeaderStyle}">
+                <controls:DataGridTemplateColumn Header="Function" Width="100" HeaderStyle="{StaticResource ClearFilterHeaderStyle}">
                     <controls:DataGridTemplateColumn.CellTemplate>
                         <DataTemplate x:DataType="models:Model">
                             <Button Content="Borrow" IsEnabled="{Binding Available, Converter={StaticResource GreaterThanZero}}"

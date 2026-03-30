@@ -102,13 +102,22 @@ namespace DeviceSrv.ViewModels
             }
         }
 
+        public override void ClearFilters()
+        {
+            FilterHeaders.Clear();
+            // Reset ComboBox defaults to empty
+            FilterHeaders["ModelGrid_Category"] = "";
+            FilterHeaders["ModelGrid_Manufacturer"] = "";
+            ModelCurrentPage = 1;
+            _ = LoadModelsAsync();
+        }
+
         public async Task LoadCategoriesAsync()
         {
             try
             {
                 var categories = await _deviceService.GetDistinctCategoriesAsync();
                 var categoryList = categories.ToList();
-                categoryList.Insert(0, "All");
 
                 if (!FilterOptions.ContainsKey("ModelGrid_Category")) FilterOptions["ModelGrid_Category"] = new ObservableCollection<string>();
                 var options = FilterOptions["ModelGrid_Category"];
@@ -118,7 +127,7 @@ namespace DeviceSrv.ViewModels
                 
                 if (!FilterHeaders.TryGetValue("ModelGrid_Category", out var currentVal) || !options.Contains(currentVal))
                 {
-                    FilterHeaders["ModelGrid_Category"] = "All";
+                    FilterHeaders["ModelGrid_Category"] = "";
                 }
             }
             catch (Exception ex)
@@ -133,7 +142,6 @@ namespace DeviceSrv.ViewModels
             {
                 var manufacturers = await _deviceService.GetDistinctManufacturersAsync();
                 var manList = manufacturers.ToList();
-                manList.Insert(0, "All");
 
                 if (!FilterOptions.ContainsKey("ModelGrid_Manufacturer")) FilterOptions["ModelGrid_Manufacturer"] = new ObservableCollection<string>();
                 var options = FilterOptions["ModelGrid_Manufacturer"];
@@ -143,7 +151,7 @@ namespace DeviceSrv.ViewModels
                 
                 if (!FilterHeaders.TryGetValue("ModelGrid_Manufacturer", out var currentVal) || !options.Contains(currentVal))
                 {
-                    FilterHeaders["ModelGrid_Manufacturer"] = "All";
+                    FilterHeaders["ModelGrid_Manufacturer"] = "";
                 }
             }
             catch (Exception ex)
@@ -159,10 +167,10 @@ namespace DeviceSrv.ViewModels
                 string nameFilter = FilterHeaders.TryGetValue("ModelGrid_Name", out var n) ? n : "";
                 
                 string manufacturerFilterRaw = FilterHeaders.TryGetValue("ModelGrid_Manufacturer", out var manf) ? manf : "";
-                string manufacturerFilter = manufacturerFilterRaw == "All" ? "" : manufacturerFilterRaw;
+                string manufacturerFilter = manufacturerFilterRaw;
                 
-                string categoryFilterRaw = FilterHeaders.TryGetValue("ModelGrid_Category", out var cat) ? cat : "All";
-                string categoryFilter = string.IsNullOrEmpty(categoryFilterRaw) ? "All" : categoryFilterRaw;
+                string categoryFilterRaw = FilterHeaders.TryGetValue("ModelGrid_Category", out var cat) ? cat : "";
+                string categoryFilter = string.IsNullOrEmpty(categoryFilterRaw) ? "" : categoryFilterRaw;
 
                 var (models, total) = await _deviceService.GetModelsPagedAsync(
                     ModelCurrentPage, 

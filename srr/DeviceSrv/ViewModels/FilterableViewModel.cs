@@ -24,6 +24,7 @@ namespace DeviceSrv.ViewModels
         public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
 
         public abstract void UpdateFilter(string filterKey, string text);
+        public abstract void ClearFilters();
 
         public event PropertyChangedEventHandler? PropertyChanged;
         

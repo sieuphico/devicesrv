@@ -157,7 +157,7 @@ namespace DeviceSrv.Behaviors
                         }
                         else
                         {
-                            box.SelectedItem = "All";
+                            box.SelectedItem = null;
                         }
                     }
                 }
@@ -172,7 +172,7 @@ namespace DeviceSrv.Behaviors
                 if (grid != null && !string.IsNullOrEmpty(tag))
                 {
                     var filterKey = $"{grid.Name}_{tag}";
-                    var selectedVal = box.SelectedItem?.ToString() ?? "All";
+                    var selectedVal = box.SelectedItem?.ToString() ?? "";
                     
                     if (grid.DataContext is FilterableViewModel vm)
                     {
@@ -329,6 +329,64 @@ namespace DeviceSrv.Behaviors
                 }
             }
             return (null, null);
+        }
+
+        // -------------------------------------------------------------------------
+        // EnableClearFilter Property: Attached to Button to clear all filters
+        // -------------------------------------------------------------------------
+        public static readonly DependencyProperty EnableClearFilterProperty =
+            DependencyProperty.RegisterAttached(
+                "EnableClearFilter", typeof(bool), typeof(DataGridFilterBehavior),
+                new PropertyMetadata(false, OnEnableClearFilterChanged));
+
+        public static bool GetEnableClearFilter(DependencyObject obj) => (bool)obj.GetValue(EnableClearFilterProperty);
+        public static void SetEnableClearFilter(DependencyObject obj, bool value) => obj.SetValue(EnableClearFilterProperty, value);
+
+        private static void OnEnableClearFilterChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is Button btn)
+            {
+                if ((bool)e.NewValue) btn.Click += Btn_ClearClick;
+                else btn.Click -= Btn_ClearClick;
+            }
+        }
+
+        private static void Btn_ClearClick(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn)
+            {
+                var parent = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetParent(btn);
+                while (parent != null && !(parent is CommunityToolkit.WinUI.UI.Controls.DataGrid))
+                {
+                    parent = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetParent(parent);
+                }
+
+                if (parent is CommunityToolkit.WinUI.UI.Controls.DataGrid grid)
+                {
+                    if (grid.DataContext is FilterableViewModel vm)
+                    {
+                        vm.ClearFilters();
+                        
+                        // Clear all UI controls in the header
+                        var headersPresenter = FindVisualChildByType<DataGridColumnHeadersPresenter>(grid);
+                        if (headersPresenter != null)
+                        {
+                            ClearAllFilterUI(headersPresenter);
+                        }
+                    }
+                }
+            }
+        }
+
+        private static void ClearAllFilterUI(DependencyObject parent)
+        {
+            for (int i = 0; i < Microsoft.UI.Xaml.Media.VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetChild(parent, i);
+                if (child is AutoSuggestBox box) box.Text = "";
+                else if (child is ComboBox cb) cb.SelectedItem = null;
+                else ClearAllFilterUI(child);
+            }
         }
 
         // -------------------------------------------------------------------------

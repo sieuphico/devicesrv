@@ -99,15 +99,23 @@ namespace DeviceSrv.ViewModels
             }
         }
 
+        public override void ClearFilters()
+        {
+            FilterHeaders.Clear();
+            CurrentPage = 1;
+            _ = LoadDevicesAsync();
+        }
+
         public async Task LoadDevicesAsync()
         {
             try
             {
                 string dName = FilterHeaders.TryGetValue("DeviceGrid_Name", out var dn) ? dn : "";
+                string dModel = FilterHeaders.TryGetValue("DeviceGrid_ModelName", out var dm) ? dm : "";
                 string dImei = FilterHeaders.TryGetValue("DeviceGrid_Imei", out var di) ? di : "";
                 string dSn = FilterHeaders.TryGetValue("DeviceGrid_SerialNumber", out var ds) ? ds : "";
 
-                var combinedFilter = $"{dName} {dImei} {dSn}".Trim();
+                var combinedFilter = $"{dName} {dModel} {dImei} {dSn}".Trim();
                 var (devices, total) = await _deviceService.GetDevicesPagedAsync(CurrentPage, PageSize, DeviceOrderBy, DeviceIsDescending, combinedFilter, onlyBorrowed: true);
                 
                 Devices.Clear();
