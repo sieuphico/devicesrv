@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using CommunityToolkit.WinUI.UI.Controls.Primitives;
 using System.Linq;
 using DeviceSrv.ViewModels;
@@ -107,84 +108,141 @@ namespace DeviceSrv.Behaviors
         }
 
         // -------------------------------------------------------------------------
-        // EnableComboBoxFilter Property: Attached to ComboBox to handle ItemsSource and SelectionChanged
+        // EnableCustomSearchFilter Property: Attached to Button to show a searchable Flyout
         // -------------------------------------------------------------------------
-        public static readonly DependencyProperty EnableComboBoxFilterProperty =
+        public static readonly DependencyProperty EnableCustomSearchFilterProperty =
             DependencyProperty.RegisterAttached(
-                "EnableComboBoxFilter", typeof(bool), typeof(DataGridFilterBehavior),
-                new PropertyMetadata(false, OnEnableComboBoxFilterChanged));
+                "EnableCustomSearchFilter", typeof(bool), typeof(DataGridFilterBehavior),
+                new PropertyMetadata(false, OnEnableCustomSearchFilterChanged));
 
-        public static bool GetEnableComboBoxFilter(DependencyObject obj) => (bool)obj.GetValue(EnableComboBoxFilterProperty);
-        public static void SetEnableComboBoxFilter(DependencyObject obj, bool value) => obj.SetValue(EnableComboBoxFilterProperty, value);
+        public static bool GetEnableCustomSearchFilter(DependencyObject obj) => (bool)obj.GetValue(EnableCustomSearchFilterProperty);
+        public static void SetEnableCustomSearchFilter(DependencyObject obj, bool value) => obj.SetValue(EnableCustomSearchFilterProperty, value);
 
-        private static void OnEnableComboBoxFilterChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnEnableCustomSearchFilterChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is ComboBox box)
+            if (d is Button btn)
             {
                 if ((bool)e.NewValue)
                 {
-                    box.Loaded += ComboBox_Loaded;
-                    box.SelectionChanged += ComboBox_SelectionChanged;
+                    btn.Loaded += CustomFilterButton_Loaded;
                 }
                 else
                 {
-                    box.Loaded -= ComboBox_Loaded;
-                    box.SelectionChanged -= ComboBox_SelectionChanged;
+                    btn.Loaded -= CustomFilterButton_Loaded;
                 }
             }
         }
 
-        private static void ComboBox_Loaded(object sender, RoutedEventArgs e)
+        private static void CustomFilterButton_Loaded(object sender, RoutedEventArgs e)
         {
-            if (sender is ComboBox box)
+            if (sender is Button btn)
             {
-                var (grid, tag) = GetGridAndTag(box);
+                // Set initial text based on ViewModel state
+                UpdateSelectedValueText(btn);
+
+                if (btn.Flyout is Flyout flyout)
+                {
+                    flyout.Opened -= CustomFilterFlyout_Opened;
+                    flyout.Opened += CustomFilterFlyout_Opened;
+                }
+            }
+        }
+
+        private static void CustomFilterFlyout_Opened(object? sender, object e)
+        {
+            if (sender is Flyout flyout && flyout.Target is Button btn)
+            {
+                var searchBox = FindVisualChildByName<TextBox>(flyout.Content, "FilterSearchBox");
+                var listView = FindVisualChildByName<ListView>(flyout.Content, "FilterListView");
+
+                if (searchBox != null && listView != null)
+                {
+                    var (grid, tag) = GetGridAndTag(btn);
+                    if (grid != null && !string.IsNullOrEmpty(tag))
+                    {
+                        var filterKey = $"{grid.Name}_{tag}";
+                        if (grid.DataContext is FilterableViewModel vm && vm.FilterOptions.TryGetValue(filterKey, out var options))
+                        {
+                            listView.ItemsSource = options;
+                            
+                            // Highlight current selection
+                            if (vm.FilterHeaders.TryGetValue(filterKey, out var current))
+                            {
+                                listView.SelectedItem = options.FirstOrDefault(o => o == current);
+                            }
+
+                            // Handle Search
+                            searchBox.Text = ""; // Reset search on open
+                            searchBox.TextChanged -= (s, arg) => FilterListViewItems(listView, options, searchBox.Text);
+                            searchBox.TextChanged += (s, arg) => FilterListViewItems(listView, options, searchBox.Text);
+                            
+                            // Handle Selection
+                            listView.SelectionChanged -= (s, arg) => 
+                            {
+                                if (listView.SelectedItem is string selected)
+                                {
+                                    vm.UpdateFilter(filterKey, selected);
+                                    UpdateSelectedValueText(btn);
+                                    flyout.Hide();
+                                }
+                            };
+                            listView.SelectionChanged += (s, arg) => 
+                            {
+                                if (listView.SelectedItem is string selected)
+                                {
+                                    vm.UpdateFilter(filterKey, selected);
+                                    UpdateSelectedValueText(btn);
+                                    flyout.Hide();
+                                }
+                            };
+
+                            searchBox.Focus(FocusState.Programmatic);
+                        }
+                    }
+                }
+            }
+        }
+
+        private static void FilterListViewItems(ListView listView, System.Collections.ObjectModel.ObservableCollection<string> allItems, string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                listView.ItemsSource = allItems;
+            }
+            else
+            {
+                listView.ItemsSource = allItems.Where(i => i.Contains(query, System.StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+        }
+
+        private static void UpdateSelectedValueText(Button btn)
+        {
+            var textBlock = FindVisualChildByName<TextBlock>(btn, "SelectedValueText");
+            if (textBlock != null)
+            {
+                var (grid, tag) = GetGridAndTag(btn);
                 if (grid != null && !string.IsNullOrEmpty(tag))
                 {
                     var filterKey = $"{grid.Name}_{tag}";
                     if (grid.DataContext is FilterableViewModel vm)
                     {
-                        if (!vm.FilterOptions.TryGetValue(filterKey, out var options))
+                        if (vm.FilterHeaders.TryGetValue(filterKey, out var val) && !string.IsNullOrEmpty(val))
                         {
-                            options = new System.Collections.ObjectModel.ObservableCollection<string>();
-                            vm.FilterOptions[filterKey] = options;
-                        }
-                        box.ItemsSource = options;
-
-                        if (vm.FilterHeaders.TryGetValue(filterKey, out var currentVal) && !string.IsNullOrEmpty(currentVal))
-                        {
-                            box.SelectedItem = currentVal;
+                            textBlock.Text = val;
+                            textBlock.Foreground = (Brush)Application.Current.Resources["BlackBrush"];
                         }
                         else
                         {
-                            box.SelectedItem = null;
+                            textBlock.Text = "Filter...";
+                            textBlock.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Gray);
                         }
                     }
                 }
             }
         }
 
-        private static void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (sender is ComboBox box && box.IsLoaded) // Ensure it doesn't trigger unexpectedly during initialization
-            {
-                var (grid, tag) = GetGridAndTag(box);
-                if (grid != null && !string.IsNullOrEmpty(tag))
-                {
-                    var filterKey = $"{grid.Name}_{tag}";
-                    var selectedVal = box.SelectedItem?.ToString() ?? "";
-                    
-                    if (grid.DataContext is FilterableViewModel vm)
-                    {
-                        vm.UpdateFilter(filterKey, selectedVal);
-                    }
-                }
-            }
-        }
-
         // -------------------------------------------------------------------------
-        // IsCustomSortIcon Property: Attached to FontIcon to customize sorting icon
-        // -------------------------------------------------------------------------
+        // EnableAutoFilter Property: Attached to AutoSuggestBox to handle TextChanged
         public static readonly DependencyProperty IsCustomSortIconProperty =
             DependencyProperty.RegisterAttached(
                 "IsCustomSortIcon", typeof(bool), typeof(DataGridFilterBehavior),
@@ -384,7 +442,7 @@ namespace DeviceSrv.Behaviors
             {
                 var child = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetChild(parent, i);
                 if (child is AutoSuggestBox box) box.Text = "";
-                else if (child is ComboBox cb) cb.SelectedItem = null;
+                else if (child is Button btn && GetEnableCustomSearchFilter(btn)) UpdateSelectedValueText(btn);
                 else ClearAllFilterUI(child);
             }
         }

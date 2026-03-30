@@ -56,7 +56,7 @@
         </Setter>
     </Style>
 
-    <!-- Unified Generic Style for ComboBox Headers -->
+    <!-- Unified Generic Style for Custom Searchable Headers -->
     <Style x:Key="ComboBoxFilterHeaderStyle" TargetType="primitives:DataGridColumnHeader" BasedOn="{StaticResource BaseColumnHeaderStyle}">
         <Setter Property="ContentTemplate">
             <Setter.Value>
@@ -67,8 +67,30 @@
                             <TextBlock Text="{Binding}" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="Black" Margin="10,0,30,0"/>
                             <FontIcon behaviors:DataGridFilterBehavior.IsCustomSortIcon="True" FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="12" Foreground="Black" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0" Glyph="&#xE8CB;" />
                         </Grid>
-                        <ComboBox Grid.Row="1" Margin="2,4,2,4" behaviors:DataGridFilterBehavior.EnableComboBoxFilter="True"
-                                  HorizontalAlignment="Stretch" Height="32" PlaceholderText="Filter..."/>
+                        
+                        <!-- Custom Searchable Picker Button -->
+                        <Button Grid.Row="1" Margin="2,4,2,4" 
+                                behaviors:DataGridFilterBehavior.EnableCustomSearchFilter="True"
+                                HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Height="32" 
+                                Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+                                BorderThickness="1" BorderBrush="LightGray" Padding="8,0">
+                            <Button.Flyout>
+                                <Flyout Placement="Bottom">
+                                    <Grid Width="250" Height="400">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="*"/>
+                                        </Grid.RowDefinitions>
+                                        <TextBox x:Name="FilterSearchBox" PlaceholderText="Search..." Margin="0,0,0,8" />
+                                        <ListView x:Name="FilterListView" Grid.Row="1" SelectionMode="Single" />
+                                    </Grid>
+                                </Flyout>
+                            </Button.Flyout>
+                            <Grid HorizontalAlignment="Stretch">
+                                <TextBlock x:Name="SelectedValueText" Text="Filter..." Foreground="Gray" VerticalAlignment="Center"/>
+                                <FontIcon Glyph="&#xE70D;" FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="10" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="Gray"/>
+                            </Grid>
+                        </Button>
                     </Grid>
                 </DataTemplate>
             </Setter.Value>
