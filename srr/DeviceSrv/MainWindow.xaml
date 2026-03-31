@@ -28,6 +28,16 @@
                  Grid.Row="0"/>
 
         <TabView x:Name="MainTabView" Grid.Row="1">
+            <TabView.Resources>
+                <SolidColorBrush x:Key="TabViewItemHeaderBackgroundSelected" Color="Red" />
+                <SolidColorBrush x:Key="TabViewItemHeaderForegroundSelected" Color="White" />
+                <SolidColorBrush x:Key="TabViewItemHeaderBackgroundSelectedPointerOver" Color="DarkRed" />
+                <SolidColorBrush x:Key="TabViewItemHeaderForegroundSelectedPointerOver" Color="White" />
+            </TabView.Resources>
+            <!-- 
+            Nếu bạn muốn toàn bộ thanh header (vùng chứa các tab) cũng màu đỏ, 
+            hãy thêm thuộc tính TabStripBackground="Red" vào thẻ TabView bên dưới.
+            -->
             <TabViewItem Header="Model List" IsClosable="False">
                 <views:ModelListView DataContext="{x:Bind ViewModel.ModelVM}" />
             </TabViewItem>
