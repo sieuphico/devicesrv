@@ -88,12 +88,25 @@
             <StackPanel Orientation="Horizontal" Spacing="10">
                 <Button Content="First" Click="FirstPage_Click" IsEnabled="{x:Bind ViewModel.CanGoPrev, Mode=OneWay}"/>
                 <Button Content="Prev" Click="PrevPage_Click" IsEnabled="{x:Bind ViewModel.CanGoPrev, Mode=OneWay}"/>
-                <TextBlock VerticalAlignment="Center">
-                    <Run Text="Page "/>
-                    <Run Text="{x:Bind ViewModel.CurrentPage, Mode=OneWay}"/>
-                    <Run Text=" of "/>
-                    <Run Text="{x:Bind ViewModel.TotalPages, Mode=OneWay}"/>
-                </TextBlock>
+
+                <ItemsControl ItemsSource="{x:Bind ViewModel.DevicePageItems, Mode=OneWay}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal" Spacing="5"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:PaginationItem">
+                            <Button Content="{Binding Text}" 
+                                    Click="PageButton_Click"
+                                    IsEnabled="{Binding IsClickable}"
+                                    Background="{Binding IsCurrent, Converter={StaticResource ActiveToBrush}}"
+                                    Width="40" Height="40" Padding="0"
+                                    HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
                 <Button Content="Next" Click="NextPage_Click" IsEnabled="{x:Bind ViewModel.CanGoNext, Mode=OneWay}"/>
                 <Button Content="Last" Click="LastPage_Click" IsEnabled="{x:Bind ViewModel.CanGoNext, Mode=OneWay}"/>
             </StackPanel>

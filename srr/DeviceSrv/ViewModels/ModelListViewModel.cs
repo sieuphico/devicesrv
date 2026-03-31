@@ -12,6 +12,7 @@ namespace DeviceSrv.ViewModels
         private readonly DeviceService _deviceService = new();
 
         public ObservableCollection<Model> Models { get; } = new();
+        public ObservableCollection<PaginationItem> ModelPageItems { get; } = new();
 
         // Sorting
         private string _modelOrderBy = "Id";
@@ -39,6 +40,7 @@ namespace DeviceSrv.ViewModels
                     OnPropertyChanged(nameof(ModelTotalPages)); 
                     OnPropertyChanged(nameof(CanGoModelPrev)); 
                     OnPropertyChanged(nameof(CanGoModelNext));
+                    UpdateModelPageItems();
                 }
             } 
         }
@@ -57,6 +59,7 @@ namespace DeviceSrv.ViewModels
                 {
                     OnPropertyChanged(nameof(CanGoModelPrev)); 
                     OnPropertyChanged(nameof(CanGoModelNext)); 
+                    UpdateModelPageItems();
                     _ = LoadModelsAsync();
                 }
             } 
@@ -218,6 +221,46 @@ namespace DeviceSrv.ViewModels
             if (model != null)
             {
                 model.Available += (isBorrowed ? -1 : 1);
+            }
+        }
+
+        private void UpdateModelPageItems()
+        {
+            ModelPageItems.Clear();
+            int current = ModelCurrentPage;
+            int total = ModelTotalPages;
+            if (total <= 0) return;
+
+            if (total <= 10)
+            {
+                for (int i = 1; i <= total; i++)
+                    ModelPageItems.Add(new PaginationItem { Text = i.ToString(), Value = i, IsCurrent = i == current });
+            }
+            else
+            {
+                if (current <= 6)
+                {
+                    for (int i = 1; i <= 8; i++)
+                        ModelPageItems.Add(new PaginationItem { Text = i.ToString(), Value = i, IsCurrent = i == current });
+                    ModelPageItems.Add(new PaginationItem { Text = "...", IsEllipsis = true });
+                    ModelPageItems.Add(new PaginationItem { Text = total.ToString(), Value = total, IsCurrent = total == current });
+                }
+                else if (current > total - 6)
+                {
+                    ModelPageItems.Add(new PaginationItem { Text = "1", Value = 1, IsCurrent = 1 == current });
+                    ModelPageItems.Add(new PaginationItem { Text = "...", IsEllipsis = true });
+                    for (int i = total - 7; i <= total; i++)
+                        ModelPageItems.Add(new PaginationItem { Text = i.ToString(), Value = i, IsCurrent = i == current });
+                }
+                else
+                {
+                    ModelPageItems.Add(new PaginationItem { Text = "1", Value = 1, IsCurrent = 1 == current });
+                    ModelPageItems.Add(new PaginationItem { Text = "...", IsEllipsis = true });
+                    for (int i = current - 2; i <= current + 2; i++)
+                        ModelPageItems.Add(new PaginationItem { Text = i.ToString(), Value = i, IsCurrent = i == current });
+                    ModelPageItems.Add(new PaginationItem { Text = "...", IsEllipsis = true });
+                    ModelPageItems.Add(new PaginationItem { Text = total.ToString(), Value = total, IsCurrent = total == current });
+                }
             }
         }
     }

@@ -71,6 +71,17 @@ namespace DeviceSrv
                 return "Return";
             return "Borrow";
         }
+        public object ConvertBack(object value, Type targetType, object parameter, string language) => throw new NotImplementedException();
+    }
+
+    public class ActiveToBrushConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, string language)
+        {
+            if (value is bool isActive && isActive)
+                return new SolidColorBrush(Microsoft.UI.ColorHelper.FromArgb(255, 60, 30, 160));
+            return new SolidColorBrush(Microsoft.UI.Colors.Transparent);
+        }
 
         public object ConvertBack(object value, Type targetType, object parameter, string language) => throw new NotImplementedException();
     }

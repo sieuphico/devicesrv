@@ -44,6 +44,14 @@ namespace DeviceSrv.Views
             if (ViewModel != null) ViewModel.CurrentPage = ViewModel.TotalPages;
         }
 
+        private void PageButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.DataContext is PaginationItem item && item.IsClickable)
+            {
+                if (ViewModel != null) ViewModel.CurrentPage = item.Value;
+            }
+        }
+
         private void DataGrid_Sorting(object? sender, DataGridColumnEventArgs e)
         {
             if (sender is DataGrid grid && ViewModel != null)

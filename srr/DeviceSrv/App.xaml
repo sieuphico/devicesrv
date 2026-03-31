@@ -20,6 +20,7 @@
             <local:StringFormatConverter x:Key="StringFormat"/>
             <local:GreaterThanOneConverter x:Key="GreaterThanOne"/>
             <local:BoolToBorrowReturnConverter x:Key="BoolToBorrowReturn"/>
+            <local:ActiveToBrushConverter x:Key="ActiveToBrush"/>
 
             <!-- Other app resources here -->
 

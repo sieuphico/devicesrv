@@ -11,6 +11,7 @@ namespace DeviceSrv.ViewModels
         private readonly DeviceService _deviceService = new();
 
         public ObservableCollection<Device> Devices { get; } = new();
+        public ObservableCollection<PaginationItem> DevicePageItems { get; } = new();
 
         // Sorting
         private string _deviceOrderBy = "Id";
@@ -38,6 +39,7 @@ namespace DeviceSrv.ViewModels
                     OnPropertyChanged(nameof(TotalPages)); 
                     OnPropertyChanged(nameof(CanGoPrev)); 
                     OnPropertyChanged(nameof(CanGoNext));
+                    UpdateDevicePageItems();
                 }
             } 
         }
@@ -56,6 +58,7 @@ namespace DeviceSrv.ViewModels
                 {
                     OnPropertyChanged(nameof(CanGoPrev)); 
                     OnPropertyChanged(nameof(CanGoNext)); 
+                    UpdateDevicePageItems();
                     _ = LoadDevicesAsync();
                 }
             } 
@@ -154,6 +157,46 @@ namespace DeviceSrv.ViewModels
             {
                 ErrorMessage = $"Error toggling device status: {ex.Message}";
                 _ = LoadDevicesAsync();
+            }
+        }
+
+        private void UpdateDevicePageItems()
+        {
+            DevicePageItems.Clear();
+            int current = CurrentPage;
+            int total = TotalPages;
+            if (total <= 0) return;
+
+            if (total <= 10)
+            {
+                for (int i = 1; i <= total; i++)
+                    DevicePageItems.Add(new PaginationItem { Text = i.ToString(), Value = i, IsCurrent = i == current });
+            }
+            else
+            {
+                if (current <= 6)
+                {
+                    for (int i = 1; i <= 8; i++)
+                        DevicePageItems.Add(new PaginationItem { Text = i.ToString(), Value = i, IsCurrent = i == current });
+                    DevicePageItems.Add(new PaginationItem { Text = "...", IsEllipsis = true });
+                    DevicePageItems.Add(new PaginationItem { Text = total.ToString(), Value = total, IsCurrent = total == current });
+                }
+                else if (current > total - 6)
+                {
+                    DevicePageItems.Add(new PaginationItem { Text = "1", Value = 1, IsCurrent = 1 == current });
+                    DevicePageItems.Add(new PaginationItem { Text = "...", IsEllipsis = true });
+                    for (int i = total - 7; i <= total; i++)
+                        DevicePageItems.Add(new PaginationItem { Text = i.ToString(), Value = i, IsCurrent = i == current });
+                }
+                else
+                {
+                    DevicePageItems.Add(new PaginationItem { Text = "1", Value = 1, IsCurrent = 1 == current });
+                    DevicePageItems.Add(new PaginationItem { Text = "...", IsEllipsis = true });
+                    for (int i = current - 2; i <= current + 2; i++)
+                        DevicePageItems.Add(new PaginationItem { Text = i.ToString(), Value = i, IsCurrent = i == current });
+                    DevicePageItems.Add(new PaginationItem { Text = "...", IsEllipsis = true });
+                    DevicePageItems.Add(new PaginationItem { Text = total.ToString(), Value = total, IsCurrent = total == current });
+                }
             }
         }
     }
