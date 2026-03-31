@@ -17,12 +17,26 @@
         </Grid.RowDefinitions>
         
         <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,10" Grid.Row="0">
-            <TextBlock Text="Device Model Management" Style="{StaticResource HeaderTextBlockStyle}"/>
+            <StackPanel.Resources>
+                <!-- Hình chữ nhật -->
+                <CornerRadius x:Key="ControlCornerRadius">0</CornerRadius>
+                <!-- Màu khi Select -->
+                <SolidColorBrush x:Key="ToggleButtonBackgroundChecked" Color="Red" />
+                <SolidColorBrush x:Key="ToggleButtonForegroundChecked" Color="White" />
+                <!-- Màu khi Hover (trên nút đang select) -->
+                <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPointerOver" Color="DarkRed" />
+                <SolidColorBrush x:Key="ToggleButtonForegroundCheckedPointerOver" Color="White" />
+            </StackPanel.Resources>
+            
+            <TextBlock Text="Device Model Management" Style="{StaticResource HeaderTextBlockStyle}" VerticalAlignment="Center"/>
             <Button Click="Refresh_Click">
                 <StackPanel Orientation="Horizontal" Spacing="5">
                     <SymbolIcon Symbol="Refresh"/><TextBlock Text="Refresh"/>
                 </StackPanel>
             </Button>
+
+            <ToggleButton x:Name="OptionAButton" Content="Option A" Width="100" Checked="Option_Checked" IsChecked="True" />
+            <ToggleButton x:Name="OptionBButton" Content="Option B" Width="100" Checked="Option_Checked" />
         </StackPanel>
 
         <controls:DataGrid x:Name="ModelGrid"

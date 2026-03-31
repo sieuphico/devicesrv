@@ -59,6 +59,18 @@ namespace DeviceSrv.Views
             }
         }
 
+        private void Option_Checked(object sender, RoutedEventArgs e)
+        {
+            if (sender == OptionAButton)
+            {
+                if (OptionBButton != null) OptionBButton.IsChecked = false;
+            }
+            else if (sender == OptionBButton)
+            {
+                if (OptionAButton != null) OptionAButton.IsChecked = false;
+            }
+        }
+
         private void DataGrid_Sorting(object? sender, DataGridColumnEventArgs e)
         {
             if (sender is DataGrid grid && ViewModel != null)
